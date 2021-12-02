@@ -1,0 +1,34 @@
+---
+title: "Effects of discount pricing on Wish.com sales outcomes"
+author: "Malay Patel, Young Hoon Kim, Hector Rincon"
+date: "12/1/2021"
+output: pdf_document
+---
+
+## Introduction
+
+## Research design & data
+
+
+### Model 1
+
+### Model 2
+
+### Model 3
+
+## Results
+
+## Discussion
+
+### Generalizability
+
+### Significance
+
+
+## Limitations
+
+### LSM assumptions
+
+### OVB
+
+## Conclusion
