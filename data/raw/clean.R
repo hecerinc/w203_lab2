@@ -1,3 +1,8 @@
+# Clean the initial approval and economic data
+# 
+# Saves the final combined dataset to a file called df_minus_events.RData under
+# data/interim
+
 # Libraries
 library(dplyr)
 library(data.table)
@@ -112,27 +117,5 @@ df <- inner_join(approval.all, combined_indvars, by = 'date')
 
 
 
-## Afghanistan (August, September)
-df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9) & lubridate::year(date) == 2021, 1, 0))
-df  <- filter(df, !is.na(unrate), !is.na(cpifabsl))
-
-## --------------- COVID ---------------------------------------- 
-
-covid <- read.csv('United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv')
-covid$date <- as.Date(covid$submission_date, format='%m/%d/%Y')
-
-covid <- group_by(covid, date) %>% summarise(new_cases = sum(new_case))
-
-# we'll use the new_case variable as covid cases
-
-df <- left_join(df, select(covid, new_cases, date), by='date')
-
-# --------------------------------------------------------------- 
-
-
-# Select only cols we need
-# df <- df %>% select(date, approve_estimate, disapprove_estimate, timestamp, dcoilwtico, unrate, cpifabsl, afghanistan, new_cases)
-
-
-# MODEL
-lm(approve_estimate ~ dcoilwtico  + cpifabsl + president + unrate,data=df)
+# Save the dataset to data/interim
+save(df, file='../interim/df_minus_events.RData')
