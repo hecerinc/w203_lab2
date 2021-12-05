@@ -12,6 +12,8 @@ library(zoo)
 
 # setwd('C:/dev/mids/w203/lab2/data/raw')
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+# We'll actually be reading from this dir
+setwd('../../data/raw')
 
 # Read data
 cpi <- read.csv('cpi_fnb.csv')
