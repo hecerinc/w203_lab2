@@ -1,20 +1,53 @@
-# Loading data
+# Libraries
 library(dplyr)
 library(data.table)
 library(lubridate)
 library(zoo)
 
-options(max.print = 999999999)
 
-#setwd("C:/dev/mids/w203/lab2/data/raw")
+# setwd('C:/dev/mids/w203/lab2/data/raw')
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
-cpi <- read.csv('cpi_fnb.csv', header=T)
-unemployment <- read.csv('unemployment.csv', header=T)
-approval <- read.csv('approval_topline.csv', header=T)
-#gas <- read.csv('wti.csv')
-gas <- read.csv('dcoilwtico.csv')
+# Read data
+cpi <- read.csv('cpi_fnb.csv')
+unemployment <- read.csv('unemployment.csv')
+gas <- read.csv('wti.csv')
 
+## Aproval data
+
+### Biden
+approval.biden <- read.csv('approval_biden_538.csv')
+approval.biden$president <- 'Joe Biden' # Sometimes reads 'Joe Biden' sometimes 'Joseph R. Biden Jr.' so let's standardize
+approval.biden$date <- as.Date(approval.biden$modeldate, format='%m/%d/%Y')
+
+### Trump
+approval.trump <- read.csv('approval_trump_538.csv')
+approval.trump$date <- as.Date(approval.trump$modeldate, format='%m/%d/%Y')
+
+# Filter out unneded polls
+approval.biden <- filter(approval.biden, subgroup == 'All polls')
+approval.trump <- filter(approval.trump, subgroup == 'All polls')
+
+
+### Obama
+approval.obama <- read.csv('approval_obama_gallup.csv')
+approval.obama$date <- as.Date(approval.obama$date, format='%m/%d/%Y')
+approval.obama$president <- 'Barack Obama'
+names(approval.obama)[2] <- 'disapprove_estimate'
+names(approval.obama)[3] <- 'approve_estimate'
+
+### George Bush
+approval.bush <- read.csv('approval_georgewbush_gallup.csv')
+approval.bush$date <- as.Date(approval.bush$date, format='%Y/%m/%d')
+approval.bush$president <- 'George W. Bush'
+names(approval.bush)[2] <- 'approve_estimate'
+names(approval.bush)[3] <- 'disapprove_estimate'
+
+
+# Merge all approvals
+approval.all <- bind_rows(approval.biden, approval.obama, approval.trump, approval.bush)
+approval.all <- select(approval.all, date, president, approve_estimate, disapprove_estimate)
+approval.all$president <- as.factor(approval.all$president)
 
 
 # Easier names
@@ -22,61 +55,84 @@ names(cpi) <- tolower(names(cpi))
 names(unemployment) <- tolower(names(unemployment))
 names(gas) <- tolower(names(gas))
 
-# Correct col formats
-approval$date <- as.Date(approval$modeldate, format='%m/%d/%Y')
+
+# Format data types
 cpi$date <- as.Date(cpi$date, format='%Y-%m-%d')
 unemployment$date <- as.Date(unemployment$date, format='%Y-%m-%d')
 gas$date <- as.Date(gas$date, format='%Y-%m-%d')
 gas$dcoilwtico <- as.numeric(gas$dcoilwtico)
 
-lapply(c(gas, unemployment, cpi, approval), summary)
-
-summary(approval)
-# Looks good, not a lot of NAs
 
 
-
-## Approval
-
-range(approval$modeldate) # we got from 2021-01-23 to 2021-12-03
-
-## Gas
+start.date <- '2000-01-01'
+end.date <- '2021-12-03' # TODO: maybe we remove this because we have no data for CPI/Unemployemnt for Nov. 2021 yet
 
 
-filter(gas, month(date) == 10, year(date)==2021) %>% arrange(date)
+# ---------------- FIX GAS ---------------------------------------------
 
-# Looks like gas is only reported for weekdays. We can use the previous friday for a proxy value. DOCUMENT
-# Remove the unneeded dates
-approval <- filter(approval, modeldate >= '2021-01-23', subgroup == "All polls")
-gas <- filter(gas, date >= '2021-01-23')
-unemployment <- filter(unemployment, date >= '2021-01-23')
-cpi <- filter(cpi, date >= '2021-01-23')
-
+# filter(gas, month(date) == 10, year(date)==2021) %>% arrange(date)
+# Looks like gas is only reported for weekdays. We can use the previous Friday for a proxy value. [TODO: DOCUMENT]
 
 # For each missing date, replace the missing value with the previous value
-ts <- seq(ymd("2021-01-23"), ymd("2021-12-03"), by="day")
+ts <- seq(ymd(start.date), ymd(end.date), by='day')
 gas <- full_join(gas, data.frame(date=ts)) %>% arrange(date) %>% 
   mutate(
-    year_month = as.yearmon(date, "%Y-%m")
+    year_month = as.yearmon(date, '%Y-%m')
   )
 
 tt <- data.table(gas)
-setnafill(tt, type="locf", cols='dcoilwtico')
+setnafill(tt, type='locf', cols='dcoilwtico')
 gas <- data.frame(tt)
 
+# ---------------------------------------------------------------------- 
+
+
+
+# -- Filter out unneeded dates
+approval.all <- filter(approval.all, date >= start.date)
+gas <- filter(gas, date >= start.date)
+unemployment <- filter(unemployment, date >= start.date)
+cpi <- filter(cpi, date >= start.date)
+
 # Merge the unemployment data and cpi
-unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
-  mutate(year_month = as.yearmon(date, "%Y-%m")) %>%
-  select(-date)
+unemp_join_cpi <- merge(unemployment, cpi, by = 'date') %>%
+	mutate(year_month = as.yearmon(date, '%Y-%m')) %>%
+	select(-date)
 
 # Create a single dataframe of the all 3 independent variables - gas, cpi, and unemployment
 # Since unemployment is monthly data, we explode it to daily sequence 
 # with same value for each day in the respective month.
-combined_indvars <- full_join(gas, unemp_join_cpi, by="year_month", all = TRUE) %>%
+combined_indvars <- full_join(gas, unemp_join_cpi, by='year_month', all = TRUE) %>%
   select(-year_month)
 
-#all_variables <- inner_join(approval, combined_indvars, by = "date")
 
-#NOTE: There are still NA in unemployment rate and cpifabsl.
 
-## EDA
+# Create final dataset
+df <- inner_join(approval.all, combined_indvars, by = 'date')
+
+
+
+## Afghanistan (August, September)
+df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9) & lubridate::year(date) == 2021, 1, 0))
+df  <- filter(df, !is.na(unrate), !is.na(cpifabsl))
+
+## --------------- COVID ---------------------------------------- 
+
+covid <- read.csv('United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv')
+covid$date <- as.Date(covid$submission_date, format='%m/%d/%Y')
+
+covid <- group_by(covid, date) %>% summarise(new_cases = sum(new_case))
+
+# we'll use the new_case variable as covid cases
+
+df <- left_join(df, select(covid, new_cases, date), by='date')
+
+# --------------------------------------------------------------- 
+
+
+# Select only cols we need
+# df <- df %>% select(date, approve_estimate, disapprove_estimate, timestamp, dcoilwtico, unrate, cpifabsl, afghanistan, new_cases)
+
+
+# MODEL
+lm(approve_estimate ~ dcoilwtico  + cpifabsl + president + unrate,data=df)
