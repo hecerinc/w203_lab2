@@ -38,7 +38,7 @@ summary(approval)
 
 ## Approval
 
-range(approval$modeldate) # we got from 2021-01-23 to 2021-12-03
+range(approval$date) # we got from 2021-01-23 to 2021-12-03
 
 ## Gas
 
@@ -47,22 +47,26 @@ filter(gas, month(date) == 10, year(date)==2021) %>% arrange(date)
 
 # Looks like gas is only reported for weekdays. We can use the previous friday for a proxy value. DOCUMENT
 # Remove the unneeded dates
-approval <- filter(approval, modeldate >= '2021-01-23', subgroup == "All polls")
-gas <- filter(gas, date >= '2021-01-23')
-unemployment <- filter(unemployment, date >= '2021-01-23')
-cpi <- filter(cpi, date >= '2021-01-23')
+
 
 
 # For each missing date, replace the missing value with the previous value
-ts <- seq(ymd("2021-01-23"), ymd("2021-12-03"), by="day")
+ts <- seq(ymd("2021-01-01"), ymd("2021-12-03"), by="day")
 gas <- full_join(gas, data.frame(date=ts)) %>% arrange(date) %>% 
   mutate(
     year_month = as.yearmon(date, "%Y-%m")
   )
 
+
 tt <- data.table(gas)
 setnafill(tt, type="locf", cols='dcoilwtico')
 gas <- data.frame(tt)
+
+
+approval <- filter(approval, date >= '2021-01-23', subgroup == "All polls")
+gas <- filter(gas, date >= '2021-01-23')
+unemployment <- filter(unemployment, date >= '2021-01-01')
+cpi <- filter(cpi, date >= '2021-01-01')
 
 # Merge the unemployment data and cpi
 unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
@@ -75,8 +79,20 @@ unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
 combined_indvars <- full_join(gas, unemp_join_cpi, by="year_month", all = TRUE) %>%
   select(-year_month)
 
-#all_variables <- inner_join(approval, combined_indvars, by = "date")
+df <- inner_join(approval, combined_indvars, by = "date")
 
 #NOTE: There are still NA in unemployment rate and cpifabsl.
 
+## Afghanistan (August, September)
+df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9), 1, 0))
+
+
 ## EDA
+
+covid <- read.csv('United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv')
+covid$date <- as.Date(covid$submission_date, format='%m/%d/%Y')
+
+# we'll use the new_case variable as covid cases
+
+df <- inner_join(df, select(covid, new_case, date), by='date')
+df <- df %>% select(approve_estimate, disapprove_estimate, timestamp, date, dcoilwtico, unrate, cpifabsl, afghanistan, new_case)
