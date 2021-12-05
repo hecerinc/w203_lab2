@@ -86,13 +86,13 @@ df <- inner_join(approval, combined_indvars, by = "date")
 ## Afghanistan (August, September)
 df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9), 1, 0))
 
-
-## EDA
-
+## COVID
 covid <- read.csv('United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv')
 covid$date <- as.Date(covid$submission_date, format='%m/%d/%Y')
 
+covid <- group_by(covid, date) %>% summarise(new_cases = sum(new_case))
+
 # we'll use the new_case variable as covid cases
 
-df <- inner_join(df, select(covid, new_case, date), by='date')
-df <- df %>% select(approve_estimate, disapprove_estimate, timestamp, date, dcoilwtico, unrate, cpifabsl, afghanistan, new_case)
+df <- left_join(df, select(covid, new_cases, date), by='date')
+df <- df %>% select(date, approve_estimate, disapprove_estimate, timestamp, dcoilwtico, unrate, cpifabsl, afghanistan, new_cases)
