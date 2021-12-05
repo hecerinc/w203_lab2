@@ -8,13 +8,21 @@ output: pdf_document
 ## Introduction
 
 
+
+
+If it’s possible to sum up a presidency in a single number, that number would be the president’s approval rating — or the share of Americans who approve of the job he’s doing. Arguably, that simple percentage can determine the fate of an entire presidency.
+
+For instance, a high approval rating can marshal support for a president’s agenda and minimize his party’s losses in the midterm elections — not to mention help the president himself win reelection. But a low approval rating can be electoral poison and imply that a president has lost the mandate to govern entirely.
+
+https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-rating/
+
 ## Research Design & Data
 
 The main focus of this study is to answer following question:
 
 **What is the effect of the oil price fluctuation on the current presidential approval rating?**
 
-We also want to analyze 
+We also want to analyze:
 
 
 ### Model 1
@@ -31,12 +39,22 @@ We also want to analyze
 
 ### Significance
 
+### LSM assumptions
+
+We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions: 
+
+####IID
+
+We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any hour effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
+
+### Unique BLP exists
+
+The sample size is significantly higher than 30 and Central Limit Theorem (CLT) would apply. Also, there seems to be no multi-collinearity among the variables which was also evident during modeling. Hence, we can say that we would meet the sufficient conditions for meeting existence of unique BLP.
 
 ## Limitations
 
-### LSM assumptions
 
-### OVB
+### Omitted Variable Bias
 
 The causal relationship that we have attempted to establish in our model was the effect of gas price fluctuations on current president’s approval ratings. We also identified additional co-variates and modeled their impact on the outcome variable. Now, let's look at some of the variables that we may have omitted but could introduce bias in terms of effects on the coefficients for the variables we have considered.
 
@@ -44,9 +62,9 @@ The causal relationship that we have attempted to establish in our model was the
 
 We can reason that `immigration` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Immigration` can be measured in-terms of net immigration into the United States which is also dependent on the ongoing Covid-19 restrictions on entry from various countries and also constrained operation of the consulates in host countries. There also exists illegal immigration through boarders for which official accounts do not exists.
 
-**True Model       :** $\text{approval_rating} = \beta_0 + \beta_1\text{gas_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment_rate} + \beta_4 \text{immigration}$
+**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{immigration}$$
 
-**Approx. Model    :** $\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{ cpi } + \tilde{\beta}_3 \text{unemployment\_rate}$
+**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{cpi} + \tilde{\beta}_3 \text{unemployment\_rate}$$
 
 We won't be able to accurately calculate the effect because of unavailability of accurate and accountable data on `immigration`, however we will try to speculate the effect of `immigration` coefficient and direction of bias with the other co-variates based on our domain knowledge.
 
@@ -58,9 +76,9 @@ First, let's see how `immigration` directly affect our outcome variable `approva
 
 We can reason that `Natural Disasters` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Natural Disasters` could create an indirect effect on approval rating as it tends to frustrate people on the situation they are put in, and often best effort by government fall short of making up for the loss people incur. Also, natural disasters like forest fires creates direct impact on local farming industry and that temporarily drives the food prices up.
 
-**True Model       :** $\text{approval_rating} = \beta_0 + \beta_1\text{gas_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment_rate} + \beta_4 \text{natural_disaster}$
+**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{natural\_disaster}$$
 
-**Approx. Model    :** $\text{approval_rating} = \tilde{\beta}_0 + \tilde{\beta}_1\text{gas_price} + \tilde{\beta}_2 \text{ cpi } + \tilde{\beta}_3 \text{unemployment_rate}$
+**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{ cpi } + \tilde{\beta}_3 \text{unemployment\_rate}$$
 
 We won't be able to accurately calculate the effect because of unavailability of accurate and measurable data on `natural_disaster`, however we will try to speculate the effect of coefficient and direction of bias with the other co-variates based on our best judgement.
 
