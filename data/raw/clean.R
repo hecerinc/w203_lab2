@@ -12,8 +12,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 cpi <- read.csv('cpi_fnb.csv', header=T)
 unemployment <- read.csv('unemployment.csv', header=T)
 approval <- read.csv('approval_topline.csv', header=T)
-#gas <- read.csv('wti.csv')
-gas <- read.csv('dcoilwtico.csv')
+gas <- read.csv('wti.csv')
 
 
 
@@ -51,7 +50,7 @@ filter(gas, month(date) == 10, year(date)==2021) %>% arrange(date)
 
 
 # For each missing date, replace the missing value with the previous value
-ts <- seq(ymd("2021-01-01"), ymd("2021-12-03"), by="day")
+ts <- seq(ymd("2016-01-01"), ymd("2021-12-03"), by="day")
 gas <- full_join(gas, data.frame(date=ts)) %>% arrange(date) %>% 
   mutate(
     year_month = as.yearmon(date, "%Y-%m")
@@ -63,10 +62,11 @@ setnafill(tt, type="locf", cols='dcoilwtico')
 gas <- data.frame(tt)
 
 
-approval <- filter(approval, date >= '2021-01-23', subgroup == "All polls")
-gas <- filter(gas, date >= '2021-01-23')
-unemployment <- filter(unemployment, date >= '2021-01-01')
-cpi <- filter(cpi, date >= '2021-01-01')
+start.date <- '2016-01-01'
+approval <- filter(approval, date >= start.date, subgroup == "All polls")
+gas <- filter(gas, date >= start.date)
+unemployment <- filter(unemployment, date >= start.date)
+cpi <- filter(cpi, date >= start.date)
 
 # Merge the unemployment data and cpi
 unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
@@ -79,12 +79,15 @@ unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
 combined_indvars <- full_join(gas, unemp_join_cpi, by="year_month", all = TRUE) %>%
   select(-year_month)
 
-df <- inner_join(approval, combined_indvars, by = "date")
+approval.all <- rbind(approval, approval.trump)
+
+df <- inner_join(approval.all, combined_indvars, by = "date")
 
 #NOTE: There are still NA in unemployment rate and cpifabsl.
 
 ## Afghanistan (August, September)
-df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9), 1, 0))
+df <-  mutate(df, afghanistan = if_else(lubridate::month(date) %in% c(8, 9) & lubridate::year(date) == 2021, 1, 0))
+df  <- filter(df, !is.na(unrate), !is.na(cpifabsl))
 
 ## COVID
 covid <- read.csv('United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv')
