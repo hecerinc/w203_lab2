@@ -1,5 +1,5 @@
 ---
-title: "Effects of discount pricing on Wish.com sales outcomes"
+title: "Effects of gas prices and other economic indicators on presidential approval"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/1/2021"
 output: pdf_document
@@ -20,9 +20,58 @@ https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-ratin
 
 The main focus of this study is to answer following question:
 
-**What is the effect of the oil price fluctuation on the current presidential approval rating?**
+**What is the effect of the gas price fluctuation on the current presidential approval rating?**
 
-We also want to analyze:
+This study will focus solely on the United States. As such, any results are valid only in the specific context of American political life. The implications of these findings are of paramount importance to all levels of actors in the political sphere. From campaign managers to party leadership to political activitists, the role economic factors play in presidential approval is an important, critical knob that all parties can intervene to further political agendas and projects.
+
+### Data
+
+In this section we describe the different datasets and variables of interest we consider for this study.
+
+All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/). 
+
+#### Unemployment rate
+
+The unemployment rate is published monthly by the U.S. Bureau of Labor Statistics, with adjustment for seasonality and is defined as
+
+> ...the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
+
+Under the logic of the current study, unemployment rate is one of the measures we consider as "lived economy" for the average American citizen. As previously mentioned, economic indicators like the GDP and the trade deficit are hard to grasp concepts, but employment &mdash; or lack thereof &mdash; is an immediately perceivable and highly impacting variable in people's day to day lives. We would expect that increasing unemployment rates will have a negative effect on approval rates for the president in office.
+
+We will note the low resolution of this data. Since this is only published monthly, we do not have the same level of resolution as the more frequently conducted approval polls data. Given the number of observations (240 months in the past 20 years), we do not think this will significantly impact results. (==TODO: CONFIRM==) Because of this, we have decided to replicate the monthly figure for all days in the month to correlate with the daily value of approval.
+
+The U.S. BLS has data going back to 1948, and we have restricted ourselves to the monthly percentage reported for the period of interest.
+
+==EDA HERE==
+
+#### Crude oil prices (WTI)
+
+Our main variable of interest is gasoline prices. Gasoline prices are probably the most immediate way that the average consumer experiences the economy in "real time". Given the sensitivity of gas prices to global economic shifts/policy, and the relative elasticity of the good, consumers' bottom lines are hit most immediately by the big red number they find at their nearest gas station. We therefore expect an increase in crude oil prices (as measured by WTI) to have a negative impact on presidential approval as well.
+
+##### Data
+
+We have used in this study the reported trading price of the West Texas Intermediate (WTI) as a proxy for gasoline prices. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
+
+This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
+
+
+==EDA HERE==
+
+#### Food and beverage prices (CPI)
+
+Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion. 
+
+Similar to unemployment rate, since this value is published at a month-only resolution, we have decided to utilize the monthly value (published at the beginning of the following month) replicated across all days of that month to match the daily resolution of approval poll data.
+
+We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
+
+
+
+==EDA HERE==
+
+#### Event data
+
+
 
 
 ### Model 1
@@ -88,3 +137,12 @@ Natural disasters creates imbalances in people's life and people often blame the
 
 
 ## Conclusion
+
+## References
+
+
+
+
+- U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DCOILWTICO, December 1, 2021.
+- U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
+- U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CPIFABSL, December 5, 2021.
