@@ -145,12 +145,15 @@ Temporary events and thereby the coverage in new media sometimes create transien
 
 ### Candidate's Popularity
 
-Some of the presidents have had a popular personality even before they took the office. This may influence the overal surveys and hence this study.
+Some of the presidents have had a popular personality even before they took the office. This may influence the overall surveys and hence this study.
 
 ### Missing WTI Crude price for holidays
 
-### Unemployment & CPI Weekly Index
+We observed that the WTI index is not updated for weekends and holidays. This was handled by rolling over the prior day's data, but it does come forward as a data limitation in the study.
 
+### Unemployment & CPI Monthly Index
+
+The unemployment rate and CPI are monthly indexes where as approval and oil prices are daily indexes. For this study we definitely did not want to capture key economic indicators like food prices and unemployment rate. Lack of any high precision data we decided to take the month data and explode it to daily index and progressed with the study. 
 
 ## Conclusion
 
