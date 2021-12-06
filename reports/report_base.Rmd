@@ -6,8 +6,19 @@ output: pdf_document
 ---
 
 ## Introduction
-
-
+```{r include=FALSE}
+require(dplyr)
+require(data.table)
+require(lubridate)
+require(zoo)
+require(tidyverse)
+require(ggplot2) 
+require(sandwich)
+require(stargazer)
+require(patchwork) # To display 2 charts together
+require(hrbrthemes)
+options(max.print = 999999999)
+```
 
 
 If it’s possible to sum up a presidency in a single number, that number would be the president’s approval rating — or the share of Americans who approve of the job he’s doing. Arguably, that simple percentage can determine the fate of an entire presidency.
@@ -32,13 +43,14 @@ All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.o
 
 ```{r include=FALSE}
 ## Set workind directory
-setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+setwd(dirname(dirname(rstudioapi::getSourceEditorContext()$path)))
 
 ## Import raw data
-cpi <- read.csv('../data/raw/cpi_fnb.csv', header=T)               # Consumer Price Index
-unemployment <- read.csv('../data/raw/unemployment.csv', header=T) # Unemployment Rate
-approval <- read.csv('../data/raw/approval_topline.csv', header=T) # Approval Rating
-gas <- read.csv('../data/raw/dcoilwtico.csv')                      # Crude Oil Prices: West Texas Intermediate (WTI)
+cpi <- read.csv('data/raw/cpi_fnb.csv', header=T)                 # Consumer Price Index
+unemployment <- read.csv('data/raw/unemployment.csv', header=T)   # Unemployment Rate
+approval <- read.csv('data/raw/approval_biden_538.csv', header=T) # Approval Rating
+gas <- read.csv('data/raw/wti.csv')                               # Crude Oil Prices: West Texas Intermediate (WTI)
+covid <- read.csv('data/raw/United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv', header=T)
 ```
 
 ```{r include=FALSE}
@@ -59,6 +71,13 @@ print(range(approval$modeldate)) # we got from 2021-01-23 to 2021-12-03
 
 ## Gas
 filter(gas, month(date) == 10, year(date)==2021) %>% arrange(date)
+
+## COVID cases (total + new)
+covid <- covid %>%
+  rename(date = submission_date) %>%
+  mutate(date=as.Date(date, "%m/%d/%Y")) %>%
+  group_by(date) %>%
+  summarise(total_covid_cases = sum(tot_cases), new_covid_cases = sum(new_case))
 
 # Looks like gas is only reported for weekdays. We can use the previous friday for a proxy value. DOCUMENT
 # Remove the unneeded dates
@@ -93,14 +112,17 @@ unemp_join_cpi <- merge(unemployment, cpi, by = "date") %>%
   mutate(year_month = as.yearmon(date, "%Y-%m")) %>%
   select(-date)
 
-# Create a single dataframe of the all 3 independent variables - gas, cpi, and unemployment
+# Merge gas + COVID
+gas.cov <- inner_join(gas, covid, by='date')
+
+# Create a single dataframe of the all 3 independent variables - gas, COVID cases, cpi, and unemployment
 # Since unemployment is monthly data, we explode it to daily sequence 
 # with same value for each day in the respective month.
-combined_indvars <- full_join(gas, unemp_join_cpi, by="year_month", all = TRUE) %>%
+combined_indvars <- full_join(gas.cov, unemp_join_cpi, by="year_month", all = TRUE) %>%
   select(-year_month)
 
 ## Combine Y with Xs
-df <- left_join(approval, combined_indvars, by = 'date')  # Full data
+df <- inner_join(approval, combined_indvars, by = 'date')  # Full data
 ```
 
 #### Unemployment rate
@@ -117,12 +139,27 @@ The U.S. BLS has data going back to 1948, and we have restricted ourselves to th
 
 ==EDA HERE==
 ```{r}
-unr.cpi <- df %>%
+## Unemployment + approval rating
+uc_coef <- 8.5
+unr.ap <- df %>%
   ggplot() +
   aes(x = date) +
-  geom_line(aes(y = unrate), color = 'red') +
-  geom_line(aes(y = cpi), color = 'blue')
-unr.cpi
+  geom_line(aes(y = unrate, color = 'unrate')) +
+  geom_line(aes(y = approval_rating/uc_coef, color = 'approval_rating')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "Unemployment Rate",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*uc_coef, name="approval_rating")
+  ) +
+  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval_rating" = "darkorange")) +
+  labs(
+    title = 'Unemployment rate & approval rating trends'
+  )
+
+unr.ap
 ```
 
 #### Crude oil prices (WTI)
@@ -137,6 +174,28 @@ This data is published daily by the U.S. Energy Information Administration (EIA)
 
 
 ==EDA HERE==
+```{r}
+## Approval rating vs gas
+arg.coef <- 1.33
+ar.g <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = approval_rating, color = 'approval_rating')) +
+  geom_line(aes(y = gas/arg.coef, color = 'gas')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "approval_rating",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*arg.coef, name="gas price")
+  ) +
+  scale_color_manual(name = "variables", values = c("approval_rating" = "darkblue", "gas" = "darkred")) +
+  labs(
+    title = 'Approval rating vs gas price trend comparison'
+  )
+ar.g
+```
 
 #### Food and beverage prices (CPI)
 
@@ -149,17 +208,134 @@ We expect again a negative effect on presidential approval as food and beverage 
 
 
 ==EDA HERE==
+```{r}
+## Unemployment + CPI
+uc_coef <- 50
+unr.cpi <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = unrate, color = 'unrate')) +
+  geom_line(aes(y = cpi/uc_coef, color = 'cpi')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "Unemployment Rate",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*uc_coef, name="CPI")
+  ) +
+  scale_color_manual(name = "variables", values = c("unrate" = "red", "cpi" = "darkorange")) +
+  labs(
+    title = 'Unemployment rate & CPI trends'
+  )
+## CPI + approval rating
+ca_coef <- 0.18
+cpi.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = cpi, color = 'cpi')) +
+  geom_line(aes(y = approval_rating/ca_coef, color = 'approval_rating')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "CPI",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*ca_coef, name="approval_rating")
+  ) +
+  scale_color_manual(name = "variables", values = c("cpi" = "darkorange", "approval_rating" = "darkblue")) +
+  labs(
+    title = 'CPI & approval rating trends'
+  )
+
+unr.cpi | cpi.ap
+```
 
 #### Event data
+==EDA HERE==
+```{r}
+## COVID graph
+cov_coef <- 325
+cov.g <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = new_covid_cases, color = 'new_covid_cases')) +
+  geom_line(aes(y = total_covid_cases/cov_coef, color = 'total_covid_cases')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "new_covid_cases",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*cov_coef, name="total_covid_cases")
+  ) +
+  scale_color_manual(name = "variables", values = c("total_covid_cases" = "darkgray", "new_covid_cases" = "darkgreen")) +
+  labs(
+    title = 'COVID cases trend (total + new)'
+  )
+## total vs approval
+ta_coef <- 0.00000125
+cov_t.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = total_covid_cases, color = 'total_covid_cases')) +
+  geom_line(aes(y = approval_rating/ta_coef, color = 'approval_rating')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "total_covid_cases",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*ta_coef, name="approval_rating")
+  ) +
+  scale_color_manual(name = "variables", values = c("total_covid_cases" = "darkgray", "approval_rating" = "darkblue")) +
+  labs(
+    title = 'total COVID cases & approval rating trends'
+  )
+
+## new vs approval
+na_coef <- 0.000325
+cov_n.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = new_covid_cases, color = 'new_covid_cases')) +
+  geom_line(aes(y = approval_rating/na_coef, color = 'approval_rating')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "new_covid_cases",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*na_coef, name="approval_rating")
+  ) +
+  scale_color_manual(name = "variables", values = c("new_covid_cases" = "darkgreen", "approval_rating" = "darkblue")) +
+  labs(
+    title = 'new COVID cases & approval rating trends'
+  )
+
+cov.g
+cov_t.ap
+cov_n.ap
+```
 
 
+### Model 1 (Approval rating vs gas price)
+```{r}
+m1 <- lm(approval_rating ~ gas, df)
+summary(m1)
+```
 
+### Model 2 (Approval rating vs gas + economic variables)
+```{r}
+m2 <- lm(approval_rating ~ gas + unrate + cpi, df)
+summary(m2)
+```
 
-### Model 1
-
-### Model 2
-
-### Model 3
+### Model 3 (Approval rating vs gas + economic variables + event variables)
+```{r}
+m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df)
+summary(m3)
+```
 
 ## Results
 
