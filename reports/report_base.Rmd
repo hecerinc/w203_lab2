@@ -7,14 +7,14 @@ output: pdf_document
 
 ## Introduction
 
+The United States is facing the most political polarization since the Civil War. According to the Pew Research Center, “Republicans and Democrats are more divided along ideological lines - and partisan antipathy is deeper and more extensive - than at any point in the last two decades”. In this context, presidential elections have largely turned into an exercise of animated bases within the two dominant parties, with emphasis veering away from actual policy work by politicians in charge.
 
+It is a well studied problem that presidential approval ratings are one of the best predictors for federal government races. Administrations have also historically been sensitive to this indicator to understand the citizen’s populous response towards the presidents and their agenda. In addition to this, historical data also strongly suggest that midterm elections are a referendum on the governing party. With midterm elections coming up next year in the U.S., and in the midst of this political climate, we want to examine the components of presidential approval rating, and in particular, the effects on gas prices on this variable.
 
+On Nov. 23, 2021 the Biden administration announced that they were tapping into the U.S. strategic oil reserves to increase the supply of gasoline in light of the rapidly increasing gas prices that consumers and businesses across the country are facing. 
 
-If it’s possible to sum up a presidency in a single number, that number would be the president’s approval rating — or the share of Americans who approve of the job he’s doing. Arguably, that simple percentage can determine the fate of an entire presidency.
+The rising gas and food prices have seen Biden’s approval ratings slump significantly, presumably because these are the ways in which the average consumer “experiences” the economy closest. Other economic indicators tend to trickle down to consumers in a much slower fashion, but consumers immediately feel the effect on their bottom line when they go to refuel their tank or at the supermarket.
 
-For instance, a high approval rating can marshal support for a president’s agenda and minimize his party’s losses in the midterm elections — not to mention help the president himself win reelection. But a low approval rating can be electoral poison and imply that a president has lost the mandate to govern entirely.
-
-https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-rating/
 
 ## Research Design & Data
 
@@ -48,9 +48,7 @@ The U.S. BLS has data going back to 1948, and we have restricted ourselves to th
 
 Our main variable of interest is gasoline prices. Gasoline prices are probably the most immediate way that the average consumer experiences the economy in "real time". Given the sensitivity of gas prices to global economic shifts/policy, and the relative elasticity of the good, consumers' bottom lines are hit most immediately by the big red number they find at their nearest gas station. We therefore expect an increase in crude oil prices (as measured by WTI) to have a negative impact on presidential approval as well.
 
-##### Data
-
-We have used in this study the reported trading price of the West Texas Intermediate (WTI) as a proxy for gasoline prices. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
+We have used the reported trading price of the West Texas Intermediate (WTI) as a **proxy** for gasoline prices in this study. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
 
 This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
 
@@ -68,6 +66,11 @@ We expect again a negative effect on presidential approval as food and beverage 
 
 
 ==EDA HERE==
+
+
+The variables of interest from the different datasets are summarized below:
+
+![](./image02_data_variable_summary.png)
 
 #### Event data
 
@@ -92,16 +95,13 @@ We expect again a negative effect on presidential approval as food and beverage 
 
 We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions: 
 
-####IID
+#### IID
 
-We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any hour effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
+We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any `house` effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
 
-### Unique BLP exists
+#### Unique BLP exists
 
 The sample size is significantly higher than 30 and Central Limit Theorem (CLT) would apply. Also, there seems to be no multi-collinearity among the variables which was also evident during modeling. Hence, we can say that we would meet the sufficient conditions for meeting existence of unique BLP.
-
-## Limitations
-
 
 ### Omitted Variable Bias
 
@@ -135,12 +135,29 @@ Natural disasters creates imbalances in people's life and people often blame the
 
 ![Direction Analysis for OVB: cpi](./Image01_OVB_Immigration.png)
 
+## Limitations of the Research
+
+In the previous discussions we have stated certain assumptions that were made and accordingly prepared our data for modeling. Each of the data-sets is a very much relevant for our study, however, there are certain limitations that we do acknowledge:
+
+### Impact of temporary events
+
+Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We will consider these as outliers and focus on normal results.
+
+### Candidate's Popularity
+
+Some of the presidents have had a popular personality even before they took the office. This may influence the overal surveys and hence this study.
+
+### Missing WTI Crude price for holidays
+
+### Unemployment & CPI Weekly Index
+
 
 ## Conclusion
 
+
+
+
 ## References
-
-
 
 
 - U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DCOILWTICO, December 1, 2021.
