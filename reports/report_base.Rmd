@@ -4,6 +4,20 @@ author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/1/2021"
 output: pdf_document
 ---
+```{r Load libraries, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(ggthemes)
+library(stargazer)
+dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+```
+
+
+```{r Load data, include=FALSE}
+load('../data/interim/df_minus_events.RData') # TODO: change this to /processed
+```
 
 ## Introduction
 
@@ -28,7 +42,44 @@ This study will focus solely on the United States. As such, any results are vali
 
 In this section we describe the different datasets and variables of interest we consider for this study.
 
-All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/). 
+All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/).
+
+
+#### Crude oil prices (WTI)
+
+Our main variable of interest is gasoline prices. Gasoline prices are probably the most immediate way that the average consumer experiences the economy in "real time". Given the sensitivity of gas prices to global economic shifts/policy, and the relative elasticity of the good, consumers' bottom lines are hit most immediately by the big red number they find at their nearest gas station. We therefore expect an increase in crude oil prices (as measured by WTI) to have a negative impact on presidential approval as well.
+
+We have used the reported trading price of the West Texas Intermediate (WTI) as a **proxy** for gasoline prices in this study. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
+
+This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
+
+
+```{r EDA for WTI, warning=FALSE, error=FALSE}
+summary(df$dcoilwtico)
+hist.wti <- ggplot(df, aes(dcoilwtico)) +
+	geom_histogram(bins=50) +
+	scale_x_continuous(labels=scales::dollar) +
+	theme_classic() +
+	labs(title='Distribution of WTI prices', x='Closing price (USD p/barrel)', y='Frequency')
+line.wti <- ggplot(df, aes(date, dcoilwtico)) + geom_line() +
+	theme_classic() +
+	labs(title='Behaviour over time of WTI', x='Date', y='Closing price (USD p/barrel)')
+hist.wti / line.wti
+```
+
+
+#### Food and beverage prices (CPI)
+
+Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion.
+
+Similar to unemployment rate, since this value is published at a month-only resolution, we have decided to utilize the monthly value (published at the beginning of the following month) replicated across all days of that month to match the daily resolution of approval poll data.
+
+We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
+
+
+
+==EDA HERE==
+
 
 #### Unemployment rate
 
@@ -44,34 +95,9 @@ The U.S. BLS has data going back to 1948, and we have restricted ourselves to th
 
 ==EDA HERE==
 
-#### Crude oil prices (WTI)
-
-Our main variable of interest is gasoline prices. Gasoline prices are probably the most immediate way that the average consumer experiences the economy in "real time". Given the sensitivity of gas prices to global economic shifts/policy, and the relative elasticity of the good, consumers' bottom lines are hit most immediately by the big red number they find at their nearest gas station. We therefore expect an increase in crude oil prices (as measured by WTI) to have a negative impact on presidential approval as well.
-
-We have used the reported trading price of the West Texas Intermediate (WTI) as a **proxy** for gasoline prices in this study. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
-
-This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
-
-
-==EDA HERE==
-
-#### Food and beverage prices (CPI)
-
-Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion. 
-
-Similar to unemployment rate, since this value is published at a month-only resolution, we have decided to utilize the monthly value (published at the beginning of the following month) replicated across all days of that month to match the daily resolution of approval poll data.
-
-We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
-
-
-
-==EDA HERE==
-
-
 The variables of interest from the different datasets are summarized below:
 
 ![](./image02_data_variable_summary.png)
-
 #### Event data
 
 
@@ -93,7 +119,7 @@ The variables of interest from the different datasets are summarized below:
 
 ### LSM assumptions
 
-We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions: 
+We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions:
 
 #### IID
 
@@ -107,7 +133,7 @@ The sample size is significantly higher than 30 and Central Limit Theorem (CLT) 
 
 The causal relationship that we have attempted to establish in our model was the effect of gas price fluctuations on current president’s approval ratings. We also identified additional co-variates and modeled their impact on the outcome variable. Now, let's look at some of the variables that we may have omitted but could introduce bias in terms of effects on the coefficients for the variables we have considered.
 
-#### Immigration 
+#### Immigration
 
 We can reason that `immigration` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Immigration` can be measured in-terms of net immigration into the United States which is also dependent on the ongoing Covid-19 restrictions on entry from various countries and also constrained operation of the consulates in host countries. There also exists illegal immigration through boarders for which official accounts do not exists.
 
@@ -166,3 +192,4 @@ The unemployment rate and CPI are monthly indexes where as approval and oil pric
 - U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DCOILWTICO, December 1, 2021.
 - U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
 - U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CPIFABSL, December 5, 2021.
+- Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
