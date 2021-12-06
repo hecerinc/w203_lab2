@@ -333,7 +333,7 @@ summary(m2)
 
 ### Model 3 (Approval rating vs gas + economic variables + event variables)
 ```{r}
-m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df) #
+m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df)
 summary(m3)
 ```
 
