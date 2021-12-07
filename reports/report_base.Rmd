@@ -4,28 +4,31 @@ author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/1/2021"
 output: pdf_document
 ---
-
-## Introduction
-```{r include=FALSE}
-require(dplyr)
-require(data.table)
-require(lubridate)
-require(zoo)
-require(tidyverse)
-require(ggplot2) 
-require(sandwich)
-require(stargazer)
-require(patchwork) # To display 2 charts together
-require(hrbrthemes)
-options(max.print = 999999999)
+```{r Load libraries, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(ggthemes)
+library(stargazer)
+dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 
-If it’s possible to sum up a presidency in a single number, that number would be the president’s approval rating — or the share of Americans who approve of the job he’s doing. Arguably, that simple percentage can determine the fate of an entire presidency.
+```{r Load data, include=FALSE}
+load('../data/interim/df_minus_events.RData') # TODO: change this to /processed
+```
 
-For instance, a high approval rating can marshal support for a president’s agenda and minimize his party’s losses in the midterm elections — not to mention help the president himself win reelection. But a low approval rating can be electoral poison and imply that a president has lost the mandate to govern entirely.
+## Introduction
 
-https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-rating/
+The United States is facing the most political polarization since the Civil War. According to the Pew Research Center, “Republicans and Democrats are more divided along ideological lines - and partisan antipathy is deeper and more extensive - than at any point in the last two decades”. In this context, presidential elections have largely turned into an exercise of animated bases within the two dominant parties, with emphasis veering away from actual policy work by politicians in charge.
+
+It is a well studied problem that presidential approval ratings are one of the best predictors for federal government races. Administrations have also historically been sensitive to this indicator to understand the citizen’s populous response towards the presidents and their agenda. In addition to this, historical data also strongly suggest that midterm elections are a referendum on the governing party. With midterm elections coming up next year in the U.S., and in the midst of this political climate, we want to examine the components of presidential approval rating, and in particular, the effects on gas prices on this variable.
+
+On Nov. 23, 2021 the Biden administration announced that they were tapping into the U.S. strategic oil reserves to increase the supply of gasoline in light of the rapidly increasing gas prices that consumers and businesses across the country are facing. 
+
+The rising gas and food prices have seen Biden’s approval ratings slump significantly, presumably because these are the ways in which the average consumer “experiences” the economy closest. Other economic indicators tend to trickle down to consumers in a much slower fashion, but consumers immediately feel the effect on their bottom line when they go to refuel their tank or at the supermarket.
+
 
 ## Research Design & Data
 
@@ -39,61 +42,35 @@ This study will focus solely on the United States. As such, any results are vali
 
 In this section we describe the different datasets and variables of interest we consider for this study.
 
-All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/). 
+All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/).
 
-```{r include=FALSE}
-load('../data/interim/df_minus_events.RData') # TODO: change this to /processed
-```
-
-#### Unemployment rate
-
-The unemployment rate is published monthly by the U.S. Bureau of Labor Statistics, with adjustment for seasonality and is defined as
-
-> ...the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
-
-Under the logic of the current study, unemployment rate is one of the measures we consider as "lived economy" for the average American citizen. As previously mentioned, economic indicators like the GDP and the trade deficit are hard to grasp concepts, but employment &mdash; or lack thereof &mdash; is an immediately perceivable and highly impacting variable in people's day to day lives. We would expect that increasing unemployment rates will have a negative effect on approval rates for the president in office.
-
-We will note the low resolution of this data. Since this is only published monthly, we do not have the same level of resolution as the more frequently conducted approval polls data. Given the number of observations (240 months in the past 20 years), we do not think this will significantly impact results. (==TODO: CONFIRM==) Because of this, we have decided to replicate the monthly figure for all days in the month to correlate with the daily value of approval.
-
-The U.S. BLS has data going back to 1948, and we have restricted ourselves to the monthly percentage reported for the period of interest.
-
-==EDA HERE==
-```{r}
-## Unemployment + approval rating
-uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
-unr.ap <- df %>%
-  ggplot() +
-  aes(x = date) +
-  geom_line(aes(y = unrate, color = 'unrate')) +
-  geom_line(aes(y = approval/uc_coef, color = 'approval')) +
-  scale_y_continuous(
-
-    # Features of the first axis
-    name = "Unemployment Rate",
-
-    # Add a second axis and specify its features
-    sec.axis = sec_axis(~.*uc_coef, name="approval")
-  ) +
-  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkorange")) +
-  labs(
-    title = 'Unemployment rate & approval rating trends'
-  )
-
-unr.ap
-```
 
 #### Crude oil prices (WTI)
 
 Our main variable of interest is gasoline prices. Gasoline prices are probably the most immediate way that the average consumer experiences the economy in "real time". Given the sensitivity of gas prices to global economic shifts/policy, and the relative elasticity of the good, consumers' bottom lines are hit most immediately by the big red number they find at their nearest gas station. We therefore expect an increase in crude oil prices (as measured by WTI) to have a negative impact on presidential approval as well.
 
-##### Data
-
-We have used in this study the reported trading price of the West Texas Intermediate (WTI) as a proxy for gasoline prices. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
+We have used the reported trading price of the West Texas Intermediate (WTI) as a **proxy** for gasoline prices in this study. This variable is highly correlated to the actual gas price that consumers pay, as most gasoline in the U.S. is refined from West Texas crude oil. Moreover, the WTI price is "the main oil benchmark for North America" (Investopedia, 2020) and is widely used in the financial industry as a price for the commodity.
 
 This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
 
 
-==EDA HERE==
+```{r EDA for WTI, warning=FALSE, error=FALSE}
+summary(df$dcoilwtico)
+hist.wti <- ggplot(df, aes(dcoilwtico)) +
+	geom_histogram(bins=50) +
+	scale_x_continuous(labels=scales::dollar) +
+	theme_classic() +
+	labs(title='Distribution of WTI prices', x='Closing price (USD p/barrel)', y='Frequency')
+line.wti <- ggplot(df, aes(date, dcoilwtico)) +
+	geom_line() +
+	theme_classic() +
+	scale_y_continuous(labels=scales::dollar) +
+	labs(title='Behaviour over time of WTI', x='Date', y='Closing price (USD p/barrel)')
+hist.wti / line.wti
+```
+
+We note the dip under $0 USD in April 20, 2020 shown in the graph. This data point was in fact a time early during the COVID-19 pandemic where oversupply of oil resulted in a closing negative price for the WTI. While not an anomaly, we have decided to remove this data point from our analysis as an outlier which does not provide significant information on presidential approval.
+
 ```{r}
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
@@ -117,17 +94,27 @@ ar.g <- df %>%
 ar.g
 ```
 
+```{r, include=FALSE}
+df <- filter(df, date != '2020-04-20')
+```
+
+
 #### Food and beverage prices (CPI)
 
-Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion. 
+Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion.
 
 Similar to unemployment rate, since this value is published at a month-only resolution, we have decided to utilize the monthly value (published at the beginning of the following month) replicated across all days of that month to match the daily resolution of approval poll data.
 
 We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
 
+```{r Exploratory charts for CPI, warning=F, error=F}
+ggplot(df, aes(date, cpifabsl)) +
+	geom_line() +
+	labs(title='Consumer Price Index for All Urban Consumers:\nFood and Beverages in U.S. City Average (2001-2021)', x='Date', y='CPI') +
+	theme_classic()
+```
+We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
 
-
-==EDA HERE==
 ```{r}
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
@@ -172,8 +159,61 @@ unr.cpi
 cpi.ap
 ```
 
+#### Unemployment rate
+
+The unemployment rate is published monthly by the U.S. Bureau of Labor Statistics, with adjustment for seasonality and is defined as
+
+> ...the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
+
+Under the logic of the current study, unemployment rate is one of the measures we consider as "lived economy" for the average American citizen. As previously mentioned, economic indicators like the GDP and the trade deficit are hard to grasp concepts, but employment &mdash; or lack thereof &mdash; is an immediately perceivable and highly impacting variable in people's day to day lives. We would expect that increasing unemployment rates will have a negative effect on approval rates for the president in office.
+
+We will note the low resolution of this data. Since this is only published monthly, we do not have the same level of resolution as the more frequently conducted approval polls data. Given the number of observations (240 months in the past 20 years), we do not think this will significantly impact results. (==TODO: CONFIRM==) Because of this, we have decided to replicate the monthly figure for all days in the month to correlate with the daily value of approval.
+
+The U.S. BLS has data going back to 1948, and we have restricted ourselves to the monthly percentage reported for the period of interest.
+
+```{r Exploring unemployment rate data, error=F, warning=F}
+ggplot(df, aes(date, unrate)) +
+	geom_line() +
+	scale_y_continuous(labels = function(x) paste0(x, '%')) +
+	theme_classic() + 
+	labs(title='Unemployment rate 2001-2021', x='Date', y='Unemployment rate (%)')
+```
+```{r}
+summary(df$unrate)
+```
+
+In general, the unemployment rate has been decreasing in the past decade. Over the past twenty years it mostly stayed under 11%. We note the significant peak (rising to almost 15% of the working class population) during the beginning of the COVID-19 pandemic in March and April 2020.
+
+```{r}
+## Unemployment + approval rating
+uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
+unr.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = unrate, color = 'unrate')) +
+  geom_line(aes(y = approval/uc_coef, color = 'approval')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "Unemployment Rate",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*uc_coef, name="approval")
+  ) +
+  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkorange")) +
+  labs(
+    title = 'Unemployment rate & approval rating trends'
+  )
+
+unr.ap
+```
+
+
+The variables of interest from the different datasets are summarized below:
+
+![Summary of variables of interest](image02_data_variable_summary.png)
+
 #### Event data
-==EDA HERE==
 ```{r}
 # ## COVID graph
 # cov_coef <- 325
@@ -240,6 +280,7 @@ cpi.ap
 ```
 
 
+
 ### Model 1 (Approval rating vs gas price)
 ```{r}
 m1 <- lm(approval_rating ~ gas, df)
@@ -268,24 +309,21 @@ summary(m3)
 
 ### LSM assumptions
 
-We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions: 
+We have fairly large sample size (> 100 rows) of data in our collected sample, hence we evaluated the Large Sample Model assumptions:
 
-####IID
+#### IID
 
-We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any hour effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
+We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any `house` effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
 
-### Unique BLP exists
+#### Unique BLP exists
 
 The sample size is significantly higher than 30 and Central Limit Theorem (CLT) would apply. Also, there seems to be no multi-collinearity among the variables which was also evident during modeling. Hence, we can say that we would meet the sufficient conditions for meeting existence of unique BLP.
-
-## Limitations
-
 
 ### Omitted Variable Bias
 
 The causal relationship that we have attempted to establish in our model was the effect of gas price fluctuations on current president’s approval ratings. We also identified additional co-variates and modeled their impact on the outcome variable. Now, let's look at some of the variables that we may have omitted but could introduce bias in terms of effects on the coefficients for the variables we have considered.
 
-#### Immigration 
+#### Immigration
 
 We can reason that `immigration` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Immigration` can be measured in-terms of net immigration into the United States which is also dependent on the ongoing Covid-19 restrictions on entry from various countries and also constrained operation of the consulates in host countries. There also exists illegal immigration through boarders for which official accounts do not exists.
 
@@ -313,14 +351,35 @@ Natural disasters creates imbalances in people's life and people often blame the
 
 ![Direction Analysis for OVB: cpi](./Image01_OVB_Immigration.png)
 
+## Limitations of the Research
+
+In the previous discussions we have stated certain assumptions that were made and accordingly prepared our data for modeling. Each of the data-sets is a very much relevant for our study, however, there are certain limitations that we do acknowledge:
+
+### Impact of temporary events
+
+Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We will consider these as outliers and focus on normal results.
+
+### Candidate's Popularity
+
+Some of the presidents have had a popular personality even before they took the office. This may influence the overall surveys and hence this study.
+
+### Missing WTI Crude price for holidays
+
+We observed that the WTI index is not updated for weekends and holidays. This was handled by rolling over the prior day's data, but it does come forward as a data limitation in the study.
+
+### Unemployment & CPI Monthly Index
+
+The unemployment rate and CPI are monthly indexes where as approval and oil prices are daily indexes. For this study we definitely did not want to capture key economic indicators like food prices and unemployment rate. Lack of any high precision data we decided to take the month data and explode it to daily index and progressed with the study. 
 
 ## Conclusion
 
+
+
+
 ## References
-
-
 
 
 - U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DCOILWTICO, December 1, 2021.
 - U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
 - U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CPIFABSL, December 5, 2021.
+- Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
