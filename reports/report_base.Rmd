@@ -77,7 +77,6 @@ We have used the approval data from FiveThirtyEight for President Biden and Pres
 
 These datasets are collected and published daily. For our data of interest, we will be using the `approve_estimate` column in the dataset.
 
-==TODO PLOT==
 
 #### Crude oil prices (WTI)
 
@@ -228,7 +227,7 @@ Events are the points in the timeline which have a special effect on our outcome
 
 The main variables of interest from the different datasets are summarized below:
 
-![Summary of variables of interest](image02_data_variable_summary.png)
+![Summary of variables of interest](Image01_data_variable_summary.png)
 
 
 ## Statistical model
@@ -280,6 +279,7 @@ $$
 
 ```{r Model 3, include=F}
 m3 <- lm(approval ~ gas + cpi + unrate + president + covid + iraq + sep11 + katrina + recession + osama + ukraine + riot,  data = df)
+summary(m3)
 ```
 
 where $event_i$ is an indicator variable for the $i^{th}$ event with an associated regression coefficient $\beta_i$ for all events described previously.
@@ -321,29 +321,29 @@ The causal relationship that we have attempted to establish in our model was the
 
 We can reason that `immigration` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Immigration` can be measured in-terms of net immigration into the United States which is also dependent on the ongoing Covid-19 restrictions on entry from various countries and also constrained operation of the consulates in host countries. There also exists illegal immigration through boarders for which official accounts do not exists.
 
-**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{immigration}$$
+**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{immigration} + \ldots + \beta_i presidents_i +\ldots + \beta_j event_j$$
 
-**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{cpi} + \tilde{\beta}_3 \text{unemployment\_rate}$$
+**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{cpi} + \tilde{\beta}_3 \text{unemployment\_rate} + \ldots + \beta_i presidents_i +\ldots + \beta_j event_j$$
 
 We won't be able to accurately calculate the effect because of unavailability of accurate and accountable data on `immigration`, however we will try to speculate the effect of `immigration` coefficient and direction of bias with the other covariates based on our domain knowledge.
 
-First, let's see how `immigration` directly affects our outcome variable `approval_rating`. Immigration is a sensitive topic in the country today and with Covid-19 affecting the GDP and people's earning power across the spectrum, there is undoubtedly a sentimental vibe against immigration across a segment of population. As the government sways towards a liberal immigration policy, it may have a negative impact on the `approval rating`. Hence, we can speculate that the coefficient of immigration as a co-variate ($\beta_4$) in the regression equation will have a `negative` effect on the outcome variable. Immigrants, at least the undocumented ones, are not tracked by government agencies for their (un)employment rate hence may not have effect on the co-variate `unemployment_rate`. Also, there is no clear evidence that immigration may be affecting the `gas_price` which is mostly influenced by government policies and supply~demand ratio. However, immigration may have a statistically significant impact on farming and food prices. It is a known fact that undocumented immigrants constitute a considerable workforce as seasonal farm workers and other low paying jobs in food economy. Unavailability of these low cost seasonal labor often result in increased produce cost for citizens, and that drives the `cpi` higher, so the coefficient ($\delta_1$) will most likely be `negative`. The Omitted Variable Bias (OVB) for `cpi` ($\tilde{\beta}_2 - {\beta}_2$) will be `positive` in this case and the direction of omitted variable biases here would be **away from zero**.
+First, let's see how `immigration` directly affects our outcome variable `approval_rating`. Immigration is a sensitive topic in the country today and with Covid-19 affecting the GDP and people's earning power across the spectrum, there is undoubtedly a sentimental vibe against immigration across a segment of population. As the government sways towards a liberal immigration policy, it may have a negative impact on the `approval rating`. Hence, we can speculate that the coefficient of immigration as a covariate ($\beta_4$) in the regression equation will have a `negative` effect on the outcome variable. Immigrants, at least the undocumented ones, are not tracked by government agencies for their (un)employment rate hence may not have effect on the covariate `unemployment_rate`. Also, there is no clear evidence that immigration may be affecting the `gas_price` which is mostly influenced by government policies and supply~demand ratio. However, immigration may have a statistically significant impact on farming and food prices. It is a known fact that undocumented immigrants constitute a considerable workforce as seasonal farm workers and other low paying jobs in food economy. Unavailability of these low cost seasonal labor often result in increased produce cost for citizens, and that drives the `cpi` higher, so the coefficient ($\delta_1$) will most likely be `negative`. The Omitted Variable Bias (OVB) for `cpi` ($\tilde{\beta}_2 - {\beta}_2$) will be `positive` in this case and the direction of omitted variable biases here would be **towards zero**.
 
-![Direction Analysis for OVB: cpi](./Image01_OVB_Immigration.png)
+![Direction Analysis for OVB: cpi](./Image02_OVB_Immigration.png)
 
 #### Natural Disasters
 
-We can reason that `Natural Disasters` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Natural Disasters` could create an indirect effect on approval rating as it tends to frustrate people on the situation they are put in, and often best effort by the government falls short of making up for the loss people incur. Also, natural disasters like forest fires create a direct impact on the local farming industry and that temporarily drives the food prices up.
+We can reason that `Natural Disasters` could be an omitted variable in this causal analysis which could introduce severe bias if included in the regression model. `Natural Disasters` could create an indirect effect on approval rating as it tends to frustrate people on the situation they are put in, and often best effort by the government falls short of making up for the loss people incur. Also, natural disasters like forest fires create a direct impact on the local farming industry and that temporarily drives the food prices up. We could capture the effect of Katrina on President Bush's approval rating and the effect was significant.
 
-**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{natural\_disaster}$$
+**True Model       :** $$\text{approval\_rating} = \beta_0 + \beta_1 \text{gas\_price} + \beta_2 \text{cpi} + \beta_3 \text{unemployment\_rate} + \beta_4 \text{natural\_disaster} + \ldots + \beta_i presidents_i +\ldots + \beta_j event_j$$
 
-**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{ cpi } + \tilde{\beta}_3 \text{unemployment\_rate}$$
+**Approximate Model    :** $$\text{approval\_rating} = \tilde{\beta}_0 + \tilde{\beta}_1 \text{gas\_price} + \tilde{\beta}_2 \text{ cpi } + \tilde{\beta}_3 \text{unemployment\_rate} + \ldots + \beta_i presidents_i +\ldots + \beta_j event_j$$
 
-We won't be able to accurately calculate the effect because of unavailability of accurate and measurable data on `natural_disaster`, however we will try to speculate the effect of coefficient and direction of bias with the other covariates based on our best judgement.
+We won't be able to accurately calculate the effect of all such disasters because of unavailability of accurate and measurable data on all `natural_disaster`, however we will try to speculate the effect of coefficient and direction of bias with the other covariates based on our best judgement.
 
-Natural disasters create imbalances in people's lives and people often blame the government for failing to take care of them which in the short term may drag the approval ratings down. If it could be quantified by data then it would possibly be a `negative` coefficient ($\beta_4$) when regressed with our outcome variable `approval_rating`. Also, it would have omitted variable bias with `cpi`. Natural disasters often temporarily stalls the local economy and supply chain which drives the food prices high, so the coefficient ($\delta_1$) will most likely be `positive`. The Omitted Variable Bias (OVB) for `cpi` ($\tilde{\beta}_2 - {\beta}_2$) will be `negative` and the direction of omitted variable biases here could be **away from zero**.
+Natural disasters create imbalances in people's lives and people often blame the government for failing to take care of them which in the short term may drag the approval ratings down. If it could be quantified by data then it would possibly be a `negative` coefficient ($\beta_4$) when regressed with our outcome variable `approval_rating`. Also, it would have omitted variable bias with `cpi`. Natural disasters often temporarily stalls the local economy and supply chain which drives the food prices high, so the coefficient ($\delta_1$) will most likely be `positive`. The Omitted Variable Bias (OVB) for `cpi` ($\tilde{\beta}_2 - {\beta}_2$) will be `negative` and the direction of omitted variable biases here would be **away from zero**.
 
-![Direction Analysis for OVB: cpi](./Image01_OVB_Immigration.png)
+![Direction Analysis for OVB: cpi](./Image03_OVB_Natural_Disaster.png)
 
 ## Limitations of the Research
 
