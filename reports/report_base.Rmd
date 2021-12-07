@@ -2,8 +2,13 @@
 title: "Effects of gas prices and other economic indicators on presidential approval"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/1/2021"
-output: pdf_document
+output:
+  pdf_document:
+    keep_tex: true
+header-includes:
+   - \usepackage{dcolumn}  
 ---
+
 ```{r Load libraries, include=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -280,26 +285,59 @@ The variables of interest from the different datasets are summarized below:
 ```
 
 
+## Statistical model
 
-### Model 1 (Approval rating vs gas price)
-```{r}
-m1 <- lm(approval_rating ~ gas, df)
-summary(m1)
+
+To estimate the effect of gas prices &mdash; and related economic variables &mdash; on presidential approval numbers, we model this last indicator as a linear function of the WTI closing prices, which also accounts for the individual presidencies.
+
+We esimtate and compare this to a model that includes the relevant economic data and finally one that includes pivotal events in the each president's tenure as described by previously.
+
+### Model 1
+
+Model 1 is our base model that includes only the gas prices as a predictor variable and has the approval as the outcome variable. This model &mdash; as well as all subsequent ones &mdash; account for the president in turn through indicator variables with one for Joe Biden ($\beta_2$), Donald Trump ($\beta_3$), George W. Bush ($\beta_4$), and Barack Obama being the omitted category.
+
+$$
+\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } 
+$$
+
+```{r Model 1, include=F}
+m1 <- lm(approve_estimate ~ gas + president, data = df)
 ```
 
-### Model 2 (Approval rating vs gas + economic variables)
-```{r}
-m2 <- lm(approval_rating ~ gas + unrate + cpi, df)
-summary(m2)
+
+
+### Model 2
+
+A second specification adds the additional relevant economic indicators identified in our theoretical model and research.
+
+$$
+\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } + \beta_5 \text{CPI} + \beta_6 \text{unemployment rate }
+$$
+```{r Model 2, include=F}
+m2 <- lm(approve_estimate ~ gas + cpi + unrate + president,  data = df)
 ```
 
-### Model 3 (Approval rating vs gas + economic variables + event variables)
-```{r}
-m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df)
-summary(m3)
+### Model 3
+>>>>>>> Add initial models
+
+Our third specification adds the relevant event data to account for major events within the corresponding presidential term, as we established in our theoretical model that how presidents respond to these events and their handling are major sources of variance in presidential approval.
+
+$$
+\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } + \beta_5 \text{CPI} + \beta_6 \text{unemployment rate } + \ldots + \beta_i event_i
+$$
+
+```{r Model 3, include=F}
+# m2 <- lm(approve_estimate ~ dcoilwtico + cpifabsl + unrate + president,  data = df)
 ```
+
+where $event_i$ is an indicator variable for the $i^{th}$ event with an associated regression coefficient $\beta_i$ for all events described previously.
 
 ## Results
+
+```{r Model results, results='asis'}
+stargazer(m1, m2, header=F, title="Results", align=TRUE)
+```
+
 
 ## Discussion
 
