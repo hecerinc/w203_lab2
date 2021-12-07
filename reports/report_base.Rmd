@@ -1,7 +1,7 @@
 ---
 title: "Effects of gas prices and other economic indicators on presidential approval"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
-date: "12/1/2021"
+date: "12/7/2021"
 output:
   pdf_document:
     keep_tex: true
@@ -109,13 +109,13 @@ We note the dip under $0 USD on April 20, 2020 shown in the graph. This data poi
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
 ar.g <-  ggplot(df, aes(x = date)) +
-  geom_line(aes(y = approval, color = 'approval')) +
-  geom_line(aes(y = gas/arg.coef, color = 'gas')) +
+  geom_line(aes(y = approval, color = 'approval rating')) +
+  geom_line(aes(y = gas/arg.coef, color = 'gas price')) +
   scale_y_continuous(
-    name = "approval",
+    name = "approval rating",
     sec.axis = sec_axis(~.*arg.coef, name="gas price")
   ) +
-  scale_color_manual(name = "variables", values = c("approval" = "darkblue", "gas" = "darkred")) +
+  scale_color_manual(name = "variables", values = c("approval rating" = "darkblue", "gas price" = "darkred")) +
   labs(
     title = 'Approval rating vs gas price trend comparison'
   )
@@ -144,25 +144,25 @@ We note that the CPI &mdash; specifically the Food and Beverage component &mdash
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.cpi <- ggplot(df, aes(date)) +
-  geom_line(aes(y = unrate, color = 'unrate')) +
-  geom_line(aes(y = cpi/uc_coef, color = 'cpi')) +
+  geom_line(aes(y = unrate, color = 'Unemployment Rate')) +
+  geom_line(aes(y = cpi/uc_coef, color = 'CPI')) +
   scale_y_continuous(
     name = "Unemployment Rate",
     sec.axis = sec_axis(~.*uc_coef, name="CPI")
   ) +
-  scale_color_manual(name = "variables", values = c("unrate" = "red", "cpi" = "darkorange")) +
+  scale_color_manual(name = "variables", values = c("Unemployment Rate" = "red", "CPI" = "darkorange")) +
   labs( title = 'Unemployment rate & CPI trends' )
 
 ## CPI + approval rating
 ca_coef <- mean(df$approval, na.rm = TRUE) / mean(df$cpi, na.rm = TRUE)
 cpi.ap <-  ggplot(df, aes(x = date)) +
-  geom_line(aes(y = cpi, color = 'cpi')) +
-  geom_line(aes(y = approval/ca_coef, color = 'approval')) +
+  geom_line(aes(y = cpi, color = 'CPI')) +
+  geom_line(aes(y = approval/ca_coef, color = 'approval rating')) +
   scale_y_continuous(
     name = "CPI",
-    sec.axis = sec_axis(~.*ca_coef, name="approval")
+    sec.axis = sec_axis(~.*ca_coef, name="approval rating")
   ) +
-  scale_color_manual(name = "variables", values = c("cpi" = "darkorange", "approval" = "darkblue")) +
+  scale_color_manual(name = "variables", values = c("CPI" = "darkorange", "approval rating" = "darkblue")) +
   labs( title = 'CPI & approval rating trends' )
 
 unr.cpi / cpi.ap
@@ -196,13 +196,13 @@ In general, the unemployment rate has been decreasing in the past decade. Over t
 ## Unemployment + approval rating
 uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.ap <- ggplot(df, aes(date)) +
-  geom_line(aes(y = unrate, color = 'unrate')) +
-  geom_line(aes(y = approval/uc_coef, color = 'approval')) +
+  geom_line(aes(y = unrate, color = 'Unemployment Rate')) +
+  geom_line(aes(y = approval/uc_coef, color = 'approval rating')) +
   scale_y_continuous(
     name = "Unemployment Rate",
-    sec.axis = sec_axis(~.*uc_coef, name="approval")
+    sec.axis = sec_axis(~.*uc_coef, name="approval rating")
   ) +
-  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkblue")) +
+  scale_color_manual(name = "variables", values = c("Unemployment Rate" = "red", "approval rating" = "darkblue")) +
   labs( title = 'Unemployment rate & approval rating trends' )
 
 unr.ap
@@ -357,15 +357,11 @@ In the previous discussions we have stated certain assumptions that were made an
 
 ### Weight adjusted approval rating
 
-Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are not perfectly aware of how the weights are calculated. Since we are unaware of the exact mechanisms behind the weight calculation, we are not 100% confident that the approval rating is genuinely the representation of how the public feels about its contemporary presidents. This issue leads to other potential limitations to our research.
-
-### Bipartisan nature of the USA
-
-Connecting from the previous potential limitation, since the USA is a mostly bipartisan country, we cannot ignore the effect of one party in power affecting the other partisans. Since we are unaware of the exact mechanisms behind the weight calculation to measure the true feeling of the public, it is difficult to accurately capture the approval of presidents from the public.
+We are basing our response variable `Y` from the adjusted approval ratings by different weights, we are trusting on the weight calculation and factoring done by Five Thirty-Eight and Gallup. We are aware of the `polester house effect` and trusting the mechanism put by these organisations to ensure survey integrity.
 
 ### Impact of temporary events
 
-Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We will consider these as outliers and focus on normal results.
+Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We have tried to account for a few major ones. However, it may not be possible to capture all of them due to limited time constraint.
 
 ### Candidate's Popularity
 
