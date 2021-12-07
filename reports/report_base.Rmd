@@ -341,9 +341,15 @@ stargazer(m1, m2, m3, header=F, title="Results", align=TRUE, dep.var.labels=c('P
 
 ## Discussion
 
-### Generalizability
+The previous analysis suggests that the gas prices in the period we have identified for this study did, in fact, exert an effect on presidential approval. As expected, rising gas prices result in decreased presidential approval across all four presidencies evaluated. This is in line with our expectation that the public is sensitive to the changes in their perceived state of the economy, as represented by the gas prices.
 
-### Significance
+Additionally, we see significant effect of both CPI and unemployment rate on presidential approval. This is aligned with our theoretical model, which again suggests that the lived experience of the economy exerts an important effect on presidential approval.
+
+An important and unexpected effect that results from the analysis is that, while the actual coefficients for each presidency do not have a direct interpretation, we can clearly see a trend for marked increase in approval for Democratic presidents, as opposed to their Republican counterparts, as reflected by the negative regression coefficients for George W. Bush and Donald Trump and the analogous *positive* coefficients for Joe Biden and Barack Obama (baseline).
+
+It's important to note that the model results are limited in their generalizability. We can confidently assert that the economic indicators we have studied have an important effect on presidential approval, which, according to the literature, in turn has significant predictive power towards election results that is relevant for political actors. These results imply that there are, in fact, avenues of action that presidents and their administrations can consider and implement to affect these factors and that these would then have some influence on their results for subsequent elections.
+
+However, it is not the intent of this analysis to suggest any predictive power for future elections. Results are highly localized to the contexts of the presidencies studied. As we have seen, the inidividual events, crises, and scandals of each administration also exert a significant influence over presidential approval, and presidents rarely have much control over these.
 
 ### LSM assumptions
 
@@ -416,6 +422,11 @@ We observed that the WTI index is not updated for weekends and holidays. This wa
 ### Unemployment & CPI Monthly Index
 
 The unemployment rate and CPI are monthly measurements where as approval and oil prices are daily measurements. For this study we definitely did not want to capture key economic indicators like food prices and unemployment rate. Lack of any high precision data we decided to take the month data and explode it to daily index and progressed with the study. 
+
+
+### Inconsistency of data source
+
+We note that the data for presidential approval is inconsistent in source across the presidents. In order to obtain a more representative sample, we have used the Five Thirty-Eight model estimate for both President Trump and President Biden approval estimates, which are a weighted average of several different polls. Their approval model, however, only started with the Trump presidency so for Presidents Obama and Bush we have used the Gallup poll, because of it's reputation and overall representative sampling.
 
 
 ## Conclusion
