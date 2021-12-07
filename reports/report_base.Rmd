@@ -2,8 +2,20 @@
 title: "Effects of gas prices and other economic indicators on presidential approval"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/1/2021"
-output: pdf_document
+output:
+  pdf_document:
+    keep_tex: true
+header-includes:
+   - \usepackage{dcolumn}  
+   - \usepackage{fvextra}
+   - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 ---
+```{r, echo=FALSE, warning=FALSE}
+# install.packages('formatR') # for some reason this is required for this to work so make sure it's installed
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
 ```{r Load libraries, include=FALSE}
 library(dplyr)
 library(ggplot2)
@@ -55,13 +67,13 @@ This data is published daily by the U.S. Energy Information Administration (EIA)
 
 
 ```{r EDA for WTI, warning=FALSE, error=FALSE}
-summary(df$dcoilwtico)
-hist.wti <- ggplot(df, aes(dcoilwtico)) +
+summary(df$gas)
+hist.wti <- ggplot(df, aes(gas)) +
 	geom_histogram(bins=50) +
 	scale_x_continuous(labels=scales::dollar) +
 	theme_classic() +
 	labs(title='Distribution of WTI prices', x='Closing price (USD p/barrel)', y='Frequency')
-line.wti <- ggplot(df, aes(date, dcoilwtico)) +
+line.wti <- ggplot(df, aes(date, gas)) +
 	geom_line() +
 	theme_classic() +
 	scale_y_continuous(labels=scales::dollar) +
@@ -71,20 +83,14 @@ hist.wti / line.wti
 
 We note the dip under $0 USD in April 20, 2020 shown in the graph. This data point was in fact a time early during the COVID-19 pandemic where oversupply of oil resulted in a closing negative price for the WTI. While not an anomaly, we have decided to remove this data point from our analysis as an outlier which does not provide significant information on presidential approval.
 
-```{r}
+```{r Approval rating vs gas}
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
-ar.g <- df %>%
-  ggplot() +
-  aes(x = date) +
+ar.g <-  ggplot(df, aes(x = date)) +
   geom_line(aes(y = approval, color = 'approval')) +
   geom_line(aes(y = gas/arg.coef, color = 'gas')) +
   scale_y_continuous(
-
-    # Features of the first axis
     name = "approval",
-
-    # Add a second axis and specify its features
     sec.axis = sec_axis(~.*arg.coef, name="gas price")
   ) +
   scale_color_manual(name = "variables", values = c("approval" = "darkblue", "gas" = "darkred")) +
@@ -108,55 +114,38 @@ Similar to unemployment rate, since this value is published at a month-only reso
 We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
 
 ```{r Exploratory charts for CPI, warning=F, error=F}
-ggplot(df, aes(date, cpifabsl)) +
+ggplot(df, aes(date, cpi)) +
 	geom_line() +
 	labs(title='Consumer Price Index for All Urban Consumers:\nFood and Beverages in U.S. City Average (2001-2021)', x='Date', y='CPI') +
 	theme_classic()
 ```
 We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
 
-```{r}
+```{r Unemployment vs CPI}
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
-unr.cpi <- df %>%
-  ggplot() +
-  aes(x = date) +
+unr.cpi <- ggplot(df, aes(date)) +
   geom_line(aes(y = unrate, color = 'unrate')) +
   geom_line(aes(y = cpi/uc_coef, color = 'cpi')) +
   scale_y_continuous(
-
-    # Features of the first axis
     name = "Unemployment Rate",
-
-    # Add a second axis and specify its features
     sec.axis = sec_axis(~.*uc_coef, name="CPI")
   ) +
   scale_color_manual(name = "variables", values = c("unrate" = "red", "cpi" = "darkorange")) +
-  labs(
-    title = 'Unemployment rate & CPI trends'
-  )
+  labs( title = 'Unemployment rate & CPI trends' )
 ## CPI + approval rating
 ca_coef <- mean(df$approval, na.rm = TRUE) / mean(df$cpi, na.rm = TRUE)
-cpi.ap <- df %>%
-  ggplot() +
-  aes(x = date) +
+cpi.ap <-  ggplot(df, aes(x = date)) +
   geom_line(aes(y = cpi, color = 'cpi')) +
   geom_line(aes(y = approval/ca_coef, color = 'approval')) +
   scale_y_continuous(
-
-    # Features of the first axis
     name = "CPI",
-
-    # Add a second axis and specify its features
     sec.axis = sec_axis(~.*ca_coef, name="approval")
   ) +
   scale_color_manual(name = "variables", values = c("cpi" = "darkorange", "approval" = "darkblue")) +
-  labs(
-    title = 'CPI & approval rating trends'
-  )
+  labs( title = 'CPI & approval rating trends' )
 
-unr.cpi
-cpi.ap
+unr.cpi / cpi.ap
 ```
 
 #### Unemployment rate
@@ -184,26 +173,18 @@ summary(df$unrate)
 
 In general, the unemployment rate has been decreasing in the past decade. Over the past twenty years it mostly stayed under 11%. We note the significant peak (rising to almost 15% of the working class population) during the beginning of the COVID-19 pandemic in March and April 2020.
 
-```{r}
+```{r Unemployment vs approval rating}
 ## Unemployment + approval rating
 uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
-unr.ap <- df %>%
-  ggplot() +
-  aes(x = date) +
+unr.ap <- ggplot(df, aes(date)) +
   geom_line(aes(y = unrate, color = 'unrate')) +
   geom_line(aes(y = approval/uc_coef, color = 'approval')) +
   scale_y_continuous(
-
-    # Features of the first axis
     name = "Unemployment Rate",
-
-    # Add a second axis and specify its features
     sec.axis = sec_axis(~.*uc_coef, name="approval")
   ) +
   scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkorange")) +
-  labs(
-    title = 'Unemployment rate & approval rating trends'
-  )
+  labs( title = 'Unemployment rate & approval rating trends' )
 
 unr.ap
 ```
@@ -214,7 +195,7 @@ The variables of interest from the different datasets are summarized below:
 ![Summary of variables of interest](image02_data_variable_summary.png)
 
 #### Event data
-```{r}
+```{r, include=F}
 # ## COVID graph
 # cov_coef <- 325
 # cov.g <- df %>%
@@ -280,26 +261,64 @@ The variables of interest from the different datasets are summarized below:
 ```
 
 
+## Statistical model
 
-### Model 1 (Approval rating vs gas price)
-```{r}
-m1 <- lm(approval_rating ~ gas, df)
-summary(m1)
+
+To estimate the effect of gas prices &mdash; and related economic variables &mdash; on presidential approval numbers, we model this last indicator as a linear function of the WTI closing prices, which also accounts for the individual presidencies.
+
+We esimtate and compare this to a model that includes the relevant economic data and finally one that includes pivotal events in the each president's tenure as described by previously.
+
+### Model 1
+
+Model 1 is our base model that includes only the gas prices as a predictor variable and has the approval as the outcome variable. This model &mdash; as well as all subsequent ones &mdash; account for the president in turn through indicator variables with one for Joe Biden ($\beta_2$), Donald Trump ($\beta_3$), George W. Bush ($\beta_4$), and Barack Obama being the omitted category.
+
+$$
+\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } 
+$$
+
+```{r Model 1, include=F}
+m1 <- lm(approval ~ gas + president, data = df)
 ```
 
-### Model 2 (Approval rating vs gas + economic variables)
-```{r}
-m2 <- lm(approval_rating ~ gas + unrate + cpi, df)
-summary(m2)
+
+
+### Model 2
+
+A second specification adds the additional relevant economic indicators identified in our theoretical model and research.
+
+$$
+\begin{aligned}
+\text{approval} &= \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } \\
+&+ \beta_5 \text{CPI} + \beta_6 \text{unemployment rate }
+\end{aligned}
+$$
+```{r Model 2, include=F}
+m2 <- lm(approval ~ gas + cpi + unrate + president,  data = df)
 ```
 
-### Model 3 (Approval rating vs gas + economic variables + event variables)
-```{r}
-m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df)
-summary(m3)
+### Model 3
+
+Our third specification adds the relevant event data to account for major events within the corresponding presidential term, as we established in our theoretical model that how presidents respond to these events and their handling are major sources of variance in presidential approval.
+
+$$
+\begin{aligned}
+\text{approval} &= \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } \\
+&+ \beta_5 \text{CPI} + \beta_6 \text{unemployment rate } + \ldots + \beta_i event_i
+\end{aligned}
+$$
+
+```{r Model 3, include=F}
+# m2 <- lm(approval ~ gas + cpi + unrate + president,  data = df)
 ```
+
+where $event_i$ is an indicator variable for the $i^{th}$ event with an associated regression coefficient $\beta_i$ for all events described previously.
 
 ## Results
+
+```{r Model results, results='asis'}
+stargazer(m1, m2, header=F, title="Results", align=TRUE)
+```
+
 
 ## Discussion
 
@@ -379,7 +398,7 @@ The unemployment rate and CPI are monthly indexes where as approval and oil pric
 ## References
 
 
-- U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/DCOILWTICO, December 1, 2021.
+- U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/dcoilwtico, December 1, 2021.
 - U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
-- U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/CPIFABSL, December 5, 2021.
+- U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/cpifabsl, December 5, 2021.
 - Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
