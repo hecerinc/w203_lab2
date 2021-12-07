@@ -7,7 +7,14 @@ output:
     keep_tex: true
 header-includes:
    - \usepackage{dcolumn}  
+   - \usepackage{fvextra}
+   - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 ---
+```{r, echo=FALSE, warning=FALSE}
+# install.packages('formatR') # for some reason this is required for this to work so make sure it's installed
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
 
 ```{r Load libraries, include=FALSE}
 library(dplyr)
@@ -311,7 +318,10 @@ m1 <- lm(approve_estimate ~ gas + president, data = df)
 A second specification adds the additional relevant economic indicators identified in our theoretical model and research.
 
 $$
-\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } + \beta_5 \text{CPI} + \beta_6 \text{unemployment rate }
+\begin{aligned}
+\text{approval} &= \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } \\
+&+ \beta_5 \text{CPI} + \beta_6 \text{unemployment rate }
+\end{aligned}
 $$
 ```{r Model 2, include=F}
 m2 <- lm(approve_estimate ~ gas + cpi + unrate + president,  data = df)
@@ -323,7 +333,10 @@ m2 <- lm(approve_estimate ~ gas + cpi + unrate + president,  data = df)
 Our third specification adds the relevant event data to account for major events within the corresponding presidential term, as we established in our theoretical model that how presidents respond to these events and their handling are major sources of variance in presidential approval.
 
 $$
-\text{approval} = \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } + \beta_5 \text{CPI} + \beta_6 \text{unemployment rate } + \ldots + \beta_i event_i
+\begin{aligned}
+\text{approval} &= \beta_0 + \beta_1 \text{gas price } + \beta_2\text{Joe Biden } + \beta_3\text{Donald Trump } + \beta_4\text{George W. Bush } \\
+&+ \beta_5 \text{CPI} + \beta_6 \text{unemployment rate } + \ldots + \beta_i event_i
+\end{aligned}
 $$
 
 ```{r Model 3, include=F}

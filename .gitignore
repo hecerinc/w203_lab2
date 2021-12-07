@@ -1,6 +1,7 @@
 # Report outputs
 reports/**/*.html
 reports/**/*.pdf
+reports/**/*.tex
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
