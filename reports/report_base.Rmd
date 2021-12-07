@@ -357,7 +357,7 @@ In the previous discussions we have stated certain assumptions that were made an
 
 ### Weight adjusted approval rating
 
-Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are trusting on the weight calculation and factoring done by Five Thirty-Eight and Gallup. We are aware of the `polester house effect` and trusting the mechanism put by these organisations to ensure survey integrity.
+We are basing our response variable `Y` from the adjusted approval ratings by different weights, we are trusting on the weight calculation and factoring done by Five Thirty-Eight and Gallup. We are aware of the `polester house effect` and trusting the mechanism put by these organisations to ensure survey integrity.
 
 ### Impact of temporary events
 
