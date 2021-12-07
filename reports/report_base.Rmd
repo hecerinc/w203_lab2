@@ -71,6 +71,29 @@ hist.wti / line.wti
 
 We note the dip under $0 USD in April 20, 2020 shown in the graph. This data point was in fact a time early during the COVID-19 pandemic where oversupply of oil resulted in a closing negative price for the WTI. While not an anomaly, we have decided to remove this data point from our analysis as an outlier which does not provide significant information on presidential approval.
 
+```{r}
+## Approval rating vs gas
+arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
+ar.g <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = approval, color = 'approval')) +
+  geom_line(aes(y = gas/arg.coef, color = 'gas')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "approval",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*arg.coef, name="gas price")
+  ) +
+  scale_color_manual(name = "variables", values = c("approval" = "darkblue", "gas" = "darkred")) +
+  labs(
+    title = 'Approval rating vs gas price trend comparison'
+  )
+ar.g
+```
+
 ```{r, include=FALSE}
 df <- filter(df, date != '2020-04-20')
 ```
@@ -91,6 +114,50 @@ ggplot(df, aes(date, cpifabsl)) +
 	theme_classic()
 ```
 We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
+
+```{r}
+## Unemployment + CPI
+uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
+unr.cpi <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = unrate, color = 'unrate')) +
+  geom_line(aes(y = cpi/uc_coef, color = 'cpi')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "Unemployment Rate",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*uc_coef, name="CPI")
+  ) +
+  scale_color_manual(name = "variables", values = c("unrate" = "red", "cpi" = "darkorange")) +
+  labs(
+    title = 'Unemployment rate & CPI trends'
+  )
+## CPI + approval rating
+ca_coef <- mean(df$approval, na.rm = TRUE) / mean(df$cpi, na.rm = TRUE)
+cpi.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = cpi, color = 'cpi')) +
+  geom_line(aes(y = approval/ca_coef, color = 'approval')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "CPI",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*ca_coef, name="approval")
+  ) +
+  scale_color_manual(name = "variables", values = c("cpi" = "darkorange", "approval" = "darkblue")) +
+  labs(
+    title = 'CPI & approval rating trends'
+  )
+
+unr.cpi
+cpi.ap
+```
 
 #### Unemployment rate
 
@@ -117,6 +184,29 @@ summary(df$unrate)
 
 In general, the unemployment rate has been decreasing in the past decade. Over the past twenty years it mostly stayed under 11%. We note the significant peak (rising to almost 15% of the working class population) during the beginning of the COVID-19 pandemic in March and April 2020.
 
+```{r}
+## Unemployment + approval rating
+uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
+unr.ap <- df %>%
+  ggplot() +
+  aes(x = date) +
+  geom_line(aes(y = unrate, color = 'unrate')) +
+  geom_line(aes(y = approval/uc_coef, color = 'approval')) +
+  scale_y_continuous(
+
+    # Features of the first axis
+    name = "Unemployment Rate",
+
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*uc_coef, name="approval")
+  ) +
+  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkorange")) +
+  labs(
+    title = 'Unemployment rate & approval rating trends'
+  )
+
+unr.ap
+```
 
 
 The variables of interest from the different datasets are summarized below:
@@ -124,15 +214,90 @@ The variables of interest from the different datasets are summarized below:
 ![Summary of variables of interest](image02_data_variable_summary.png)
 
 #### Event data
+```{r}
+# ## COVID graph
+# cov_coef <- 325
+# cov.g <- df %>%
+#   ggplot() +
+#   aes(x = date) +
+#   geom_line(aes(y = new_covid_cases, color = 'new_covid_cases')) +
+#   geom_line(aes(y = total_covid_cases/cov_coef, color = 'total_covid_cases')) +
+#   scale_y_continuous(
+# 
+#     # Features of the first axis
+#     name = "new_covid_cases",
+# 
+#     # Add a second axis and specify its features
+#     sec.axis = sec_axis(~.*cov_coef, name="total_covid_cases")
+#   ) +
+#   scale_color_manual(name = "variables", values = c("total_covid_cases" = "darkgray", "new_covid_cases" = "darkgreen")) +
+#   labs(
+#     title = 'COVID cases trend (total + new)'
+#   )
+# ## total vs approval
+# ta_coef <- 0.00000125
+# cov_t.ap <- df %>%
+#   ggplot() +
+#   aes(x = date) +
+#   geom_line(aes(y = total_covid_cases, color = 'total_covid_cases')) +
+#   geom_line(aes(y = approval_rating/ta_coef, color = 'approval_rating')) +
+#   scale_y_continuous(
+# 
+#     # Features of the first axis
+#     name = "total_covid_cases",
+# 
+#     # Add a second axis and specify its features
+#     sec.axis = sec_axis(~.*ta_coef, name="approval_rating")
+#   ) +
+#   scale_color_manual(name = "variables", values = c("total_covid_cases" = "darkgray", "approval_rating" = "darkblue")) +
+#   labs(
+#     title = 'total COVID cases & approval rating trends'
+#   )
+# 
+# ## new vs approval
+# na_coef <- 0.000325
+# cov_n.ap <- df %>%
+#   ggplot() +
+#   aes(x = date) +
+#   geom_line(aes(y = new_covid_cases, color = 'new_covid_cases')) +
+#   geom_line(aes(y = approval_rating/na_coef, color = 'approval_rating')) +
+#   scale_y_continuous(
+# 
+#     # Features of the first axis
+#     name = "new_covid_cases",
+# 
+#     # Add a second axis and specify its features
+#     sec.axis = sec_axis(~.*na_coef, name="approval_rating")
+#   ) +
+#   scale_color_manual(name = "variables", values = c("new_covid_cases" = "darkgreen", "approval_rating" = "darkblue")) +
+#   labs(
+#     title = 'new COVID cases & approval rating trends'
+#   )
+# 
+# cov.g
+# cov_t.ap
+# cov_n.ap
+```
 
 
 
+### Model 1 (Approval rating vs gas price)
+```{r}
+m1 <- lm(approval_rating ~ gas, df)
+summary(m1)
+```
 
-### Model 1
+### Model 2 (Approval rating vs gas + economic variables)
+```{r}
+m2 <- lm(approval_rating ~ gas + unrate + cpi, df)
+summary(m2)
+```
 
-### Model 2
-
-### Model 3
+### Model 3 (Approval rating vs gas + economic variables + event variables)
+```{r}
+m3 <- lm(approval_rating ~ gas + unrate + cpi + log(total_covid_cases) + log(new_covid_cases), df)
+summary(m3)
+```
 
 ## Results
 

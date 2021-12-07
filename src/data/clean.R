@@ -4,11 +4,17 @@
 # data/interim
 
 # Libraries
-library(dplyr)
-library(data.table)
-library(lubridate)
-library(zoo)
-
+require(dplyr)
+require(data.table)
+require(lubridate)
+require(zoo)
+require(tidyverse)
+require(ggplot2) 
+require(sandwich)
+require(stargazer)
+require(patchwork) # To display 2 charts together
+require(hrbrthemes)
+options(max.print = 999999999)
 
 # setwd('C:/dev/mids/w203/lab2/data/raw')
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -116,7 +122,11 @@ combined_indvars <- full_join(gas, unemp_join_cpi, by='year_month', all = TRUE) 
 
 # Create final dataset
 df <- inner_join(approval.all, combined_indvars, by = 'date')
-
+df <- df %>%
+  rename(approval = approve_estimate,
+         disapproval = disapprove_estimate,
+         gas = dcoilwtico, 
+         cpi = cpifabsl)
 
 
 # Save the dataset to data/interim
