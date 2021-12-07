@@ -1,7 +1,7 @@
 ---
 title: "Effects of gas prices and other economic indicators on presidential approval"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
-date: "12/1/2021"
+date: "12/7/2021"
 output:
   pdf_document:
     keep_tex: true
@@ -357,15 +357,11 @@ In the previous discussions we have stated certain assumptions that were made an
 
 ### Weight adjusted approval rating
 
-Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are not perfectly aware of how the weights are calculated. Since we are unaware of the exact mechanisms behind the weight calculation, we are not 100% confident that the approval rating is genuinely the representation of how the public feels about its contemporary presidents. This issue leads to other potential limitations to our research.
-
-### Bipartisan nature of the USA
-
-Connecting from the previous potential limitation, since the USA is a mostly bipartisan country, we cannot ignore the effect of one party in power affecting the other partisans. Since we are unaware of the exact mechanisms behind the weight calculation to measure the true feeling of the public, it is difficult to accurately capture the approval of presidents from the public.
+Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are trusting on the weight calculation and factoring done by Five Thirty-Eight and Gallup. We are aware of the `polester house effect` and trusting the mechanism put by these organisations to ensure survey integrity.
 
 ### Impact of temporary events
 
-Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We will consider these as outliers and focus on normal results.
+Temporary events and thereby the coverage in new media sometimes create transient effects on these surveys where the approval or disapproval shoot up or down for the duration. As the new cycles settle or move over, the data becomes more reliable. We have tried to account for a few major ones. However, it may not be possible to capture all of them due to limited time constraint.
 
 ### Candidate's Popularity
 
