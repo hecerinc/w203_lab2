@@ -35,11 +35,13 @@ load('../data/interim/df_minus_events.RData') # TODO: change this to /processed
 
 The United States is facing the most political polarization since the Civil War. According to the Pew Research Center, “Republicans and Democrats are more divided along ideological lines - and partisan antipathy is deeper and more extensive - than at any point in the last two decades”. In this context, presidential elections have largely turned into an exercise of animated bases within the two dominant parties, with emphasis veering away from actual policy work by politicians in charge.
 
-It is a well studied problem that presidential approval ratings are one of the best predictors for federal government races. Administrations have also historically been sensitive to this indicator to understand the citizen’s populous response towards the presidents and their agenda. In addition to this, historical data also strongly suggest that midterm elections are a referendum on the governing party. With midterm elections coming up next year in the U.S., and in the midst of this political climate, we want to examine the components of presidential approval rating, and in particular, the effects on gas prices on this variable.
+If it’s possible to sum up a presidency in a single number, that number would be the president’s approval rating — or the share of Americans who approve of the job he or she is doing. Arguably, that simple percentage can determine the fate of an entire presidency. Administrations have also historically grown sensitive to this indicator to understand the citizen’s populous response towards the presidents and their agenda. In addition to this, historical data also strongly suggest that midterm elections are a referendum on the governing party. With midterm elections coming up next year in the U.S., and in the midst of this political climate, we want to examine the components of presidential approval rating, and in particular, the effects on gas prices on this variable.
 
 On Nov. 23, 2021 the Biden administration announced that they were tapping into the U.S. strategic oil reserves to increase the supply of gasoline in light of the rapidly increasing gas prices that consumers and businesses across the country are facing. 
 
 The rising gas and food prices have seen Biden’s approval ratings slump significantly, presumably because these are the ways in which the average consumer “experiences” the economy closest. Other economic indicators tend to trickle down to consumers in a much slower fashion, but consumers immediately feel the effect on their bottom line when they go to refuel their tank or at the supermarket.
+
+In our study, we will analyze what effect gas prices have on the president's approval ratings. We will also analyze the effect of additional variables like food and beverage prices (CPI), and unemployment rate has on the president's approval rating. We also intend to analyze any key events as indicator variables in our research. We will expand our study to not only the currently sitting president, but also to the three presidents before him, in order to improve confidence in our model. 
 
 
 ## Research Design & Data
@@ -48,7 +50,14 @@ The main focus of this study is to answer following question:
 
 **What is the effect of the gas price fluctuation on the current presidential approval rating?**
 
-This study will focus solely on the United States. As such, any results are valid only in the specific context of American political life. The implications of these findings are of paramount importance to all levels of actors in the political sphere. From campaign managers to party leadership to political activitists, the role economic factors play in presidential approval is an important, critical knob that all parties can intervene to further political agendas and projects.
+This study will focus solely on the United States. As such, any results are valid only in the specific context of American political life. The implications of these findings are of paramount importance to all levels of actors in the political sphere. From campaign managers to party leadership to political activists, the role economic factors play in presidential approval is an important, critical knob that all parties can intervene to further political agendas and projects.
+
+We also intend to explore further into additional subquestions which we will study as covariates:
+
+* How does unemployment numbers across the states affect the presidential approval rating?
+* How does food and beverages CPI index affect the presidential approval rating?
+* Does any significant event during a presidency influence the approval ratings?
+
 
 ### Data
 
@@ -66,7 +75,7 @@ We have used the reported trading price of the West Texas Intermediate (WTI) as 
 This data is published daily by the U.S. Energy Information Administration (EIA) in U.S. dollars per barrel. Since the markets are closed on weekends these prices are actually published only during the weekdays. Given this limitation, we have decided to reuse the Friday value for Saturday and Sunday to maintain the daily resolution of our approval polls data.
 
 
-```{r EDA for WTI, warning=FALSE, error=FALSE}
+```{r EDA for WTI, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
 summary(df$gas)
 hist.wti <- ggplot(df, aes(gas)) +
 	geom_histogram(bins=50) +
@@ -83,7 +92,7 @@ hist.wti / line.wti
 
 We note the dip under $0 USD in April 20, 2020 shown in the graph. This data point was in fact a time early during the COVID-19 pandemic where oversupply of oil resulted in a closing negative price for the WTI. While not an anomaly, we have decided to remove this data point from our analysis as an outlier which does not provide significant information on presidential approval.
 
-```{r Approval rating vs gas}
+```{r Approval rating vs gas, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE}
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
 ar.g <-  ggplot(df, aes(x = date)) +
@@ -113,7 +122,7 @@ Similar to unemployment rate, since this value is published at a month-only reso
 
 We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
 
-```{r Exploratory charts for CPI, warning=F, error=F}
+```{r Exploratory charts for CPI, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
 ggplot(df, aes(date, cpi)) +
 	geom_line() +
 	labs(title='Consumer Price Index for All Urban Consumers:\nFood and Beverages in U.S. City Average (2001-2021)', x='Date', y='CPI') +
@@ -121,7 +130,7 @@ ggplot(df, aes(date, cpi)) +
 ```
 We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
 
-```{r Unemployment vs CPI}
+```{r Unemployment vs CPI, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE}
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.cpi <- ggplot(df, aes(date)) +
@@ -160,20 +169,20 @@ We will note the low resolution of this data. Since this is only published month
 
 The U.S. BLS has data going back to 1948, and we have restricted ourselves to the monthly percentage reported for the period of interest.
 
-```{r Exploring unemployment rate data, error=F, warning=F}
+```{r Exploring unemployment rate data, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
 ggplot(df, aes(date, unrate)) +
 	geom_line() +
 	scale_y_continuous(labels = function(x) paste0(x, '%')) +
 	theme_classic() + 
 	labs(title='Unemployment rate 2001-2021', x='Date', y='Unemployment rate (%)')
 ```
-```{r}
+```{r warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
 summary(df$unrate)
 ```
 
 In general, the unemployment rate has been decreasing in the past decade. Over the past twenty years it mostly stayed under 11%. We note the significant peak (rising to almost 15% of the working class population) during the beginning of the COVID-19 pandemic in March and April 2020.
 
-```{r Unemployment vs approval rating}
+```{r Unemployment vs approval rating, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE}
 ## Unemployment + approval rating
 uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.ap <- ggplot(df, aes(date)) +
@@ -315,7 +324,7 @@ where $event_i$ is an indicator variable for the $i^{th}$ event with an associat
 
 ## Results
 
-```{r Model results, results='asis'}
+```{r Model results, results='asis', warning=FALSE, error=FALSE, echo=FALSE, message=FALSE}
 stargazer(m1, m2, header=F, title="Results", align=TRUE)
 ```
 
@@ -388,9 +397,14 @@ We observed that the WTI index is not updated for weekends and holidays. This wa
 
 ### Unemployment & CPI Monthly Index
 
-The unemployment rate and CPI are monthly indexes where as approval and oil prices are daily indexes. For this study we definitely did not want to capture key economic indicators like food prices and unemployment rate. Lack of any high precision data we decided to take the month data and explode it to daily index and progressed with the study. 
+The unemployment rate and CPI are monthly measurements where as approval and oil prices are daily measurements. For this study we definitely did not want to capture key economic indicators like food prices and unemployment rate. Lack of any high precision data we decided to take the month data and explode it to daily index and progressed with the study. 
+
 
 ## Conclusion
+
+Based on our research, we have found that the increase in oil prices, unemployment rate, and food & beverage prices (signified by CPI) - all have a statistically (highly) significant impact over the presidential approval rating. As the corresponding measurements trend upward, the less popular presidents appeared in the surveys. Interestingly, the overal effect is larger in the case of republican presidency. The slopes for all predictor variables are negative in our model which signifies that the relationship is clearly inverse.
+
+We also observed that unemployment rate has the largest impact on the presidential approval rating. This is a new finding for us as our original hypothesis was that oil prices has largest impact on the ratings. Our recommendation is to track the unemployment rates more closely, preferably more frequently, and do further study in this specific domain to understand the fluctuations and factors affecting the increase in unemployment rate. It is of paramount important for country to maintain a healthy economy, all it's residents are able to find a job and take care of their families. The study also clearly notes what is important for citizens in United States, and what priorities should drive the Presidents agenda in his or her tennure in the office.
 
 
 
