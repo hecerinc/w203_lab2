@@ -83,7 +83,7 @@ hist.wti / line.wti
 
 We note the dip under $0 USD in April 20, 2020 shown in the graph. This data point was in fact a time early during the COVID-19 pandemic where oversupply of oil resulted in a closing negative price for the WTI. While not an anomaly, we have decided to remove this data point from our analysis as an outlier which does not provide significant information on presidential approval.
 
-```{r Approval rating vs gas, echo=FALSE}
+```{r Approval rating vs gas, echo=FALSE, warning=FALSE}
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
 ar.g <-  ggplot(df, aes(x = date)) +
@@ -122,7 +122,7 @@ ggplot(df, aes(date, cpi)) +
 ```
 We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
 
-```{r Unemployment vs CPI, echo=FALSE}
+```{r Unemployment vs CPI, echo=FALSE, warning=FALSE}
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.cpi <- ggplot(df, aes(date)) +
@@ -179,7 +179,7 @@ summary(df$unrate)
 
 In general, the unemployment rate has been decreasing in the past decade. Over the past twenty years it mostly stayed under 11%. We note the significant peak (rising to almost 15% of the working class population) during the beginning of the COVID-19 pandemic in March and April 2020.
 
-```{r Unemployment vs approval rating, echo=FALSE}
+```{r Unemployment vs approval rating, echo=FALSE, warning=FALSE}
 ## Unemployment + approval rating
 uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.ap <- ggplot(df, aes(date)) +
