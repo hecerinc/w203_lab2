@@ -8,8 +8,10 @@ output:
 header-includes:
    - \usepackage{dcolumn}  
    - \usepackage{fvextra}
+   - \usepackage{rotating}
    - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 ---
+
 ```{r, echo=FALSE, warning=FALSE}
 # install.packages('formatR') # for some reason this is required for this to work so make sure it's installed
 library(knitr)
@@ -28,7 +30,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 ```{r Load data, include=FALSE}
-load('../data/interim/df_minus_events.RData') # TODO: change this to /processed
+load('../data/interim/df_with_events.RData') # TODO: change this to /processed
 ```
 
 ## Introduction
@@ -48,7 +50,7 @@ In our study, we will analyze what effect gas prices have on the president's app
 
 The main focus of this study is to answer following question:
 
-**What is the effect of the gas price fluctuation on the current presidential approval rating?**
+**What is the effect of the oil price fluctuation on presidential approval rating?**
 
 This study will focus solely on the United States. As such, any results are valid only in the specific context of American political life. The implications of these findings are of paramount importance to all levels of actors in the political sphere. From campaign managers to party leadership to political activists, the role economic factors play in presidential approval is an important, critical knob that all parties can intervene to further political agendas and projects.
 
@@ -65,6 +67,10 @@ In this section we describe the different datasets and variables of interest we 
 
 All economic data is sourced from the [St. Louis FRED](https://fred.stlouisfed.org/).
 
+
+#### Presidential approval
+
+==TODO==
 
 #### Crude oil prices (WTI)
 
@@ -202,6 +208,7 @@ The variables of interest from the different datasets are summarized below:
 ![Summary of variables of interest](image02_data_variable_summary.png)
 
 #### Event data
+
 ```{r, include=F}
 # ## COVID graph
 # cov_coef <- 325
@@ -271,9 +278,9 @@ The variables of interest from the different datasets are summarized below:
 ## Statistical model
 
 
-To estimate the effect of gas prices &mdash; and related economic variables &mdash; on presidential approval numbers, we model this last indicator as a linear function of the WTI closing prices, which also accounts for the individual presidencies.
+To estimate the effect of gas prices &mdash; and related economic variables &mdash; on presidential approval numbers, we model this last indicator as a linear function of the WTI closing prices, accounting for the individual presidencies by way adding a dummy variable for each of the four presidencies considered (the Obama presidency being the omitted category here).
 
-We esimtate and compare this to a model that includes the relevant economic data and finally one that includes pivotal events in the each president's tenure as described by previously.
+We estimate and compare this to a model that includes the relevant economic data and finally one that includes pivotal events in each president's tenure as described previously.
 
 ### Model 1
 
@@ -299,6 +306,7 @@ $$
 &+ \beta_5 \text{CPI} + \beta_6 \text{unemployment rate }
 \end{aligned}
 $$
+
 ```{r Model 2, include=F}
 m2 <- lm(approval ~ gas + cpi + unrate + president,  data = df)
 ```
@@ -315,15 +323,19 @@ $$
 $$
 
 ```{r Model 3, include=F}
-# m2 <- lm(approval ~ gas + cpi + unrate + president,  data = df)
+m3 <- lm(approval ~ gas + cpi + unrate + president + covid + iraq + sep11 + katrina + recession + osama + ukraine + riot,  data = df)
 ```
 
 where $event_i$ is an indicator variable for the $i^{th}$ event with an associated regression coefficient $\beta_i$ for all events described previously.
 
 ## Results
 
+```{r, include=F}
+clabels <- c('WTI closing price', 'CPI - Food and Beverages', 'Unemployment rate', 'Donald Trump presidency', 'George W. Bush presidency', 'Joe Biden presidency', 'COVID-19 pandemic', 'Iraq war', '9/11', 'Katrina hurricane', 'Great recession 2008', 'Killing of Osama bin Laden', 'Trump Ukraine scandal', 'January 6, 2021 Capitol riot')
+```
+
 ```{r Model results, results='asis', warning=FALSE, error=FALSE, echo=FALSE, message=FALSE}
-stargazer(m1, m2, header=F, title="Results", align=TRUE)
+stargazer(m1, m2, m3, header=F, title="Results", align=TRUE, dep.var.labels=c('Presidential approval (\\%)'), covariate.labels=clabels)
 ```
 
 
@@ -380,8 +392,14 @@ Natural disasters creates imbalances in people's life and people often blame the
 ## Limitations of the Research
 
 In the previous discussions we have stated certain assumptions that were made and accordingly prepared our data for modeling. Each of the data-sets is a very much relevant for our study, however, there are certain limitations that we do acknowledge:
-* Weight adjusted approval rating: Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are not perfectly aware of how the weights are calculated. Since we are unaware of the exact mechanisms behind the weight calculation, we are not 100% confident that the approval rating is genuinely the representation of how the public feels about its contemporary presidents. This issue leads to another potential limitations to our research.
-* Bipartisan nature of the USA: Connecting from the previous potential limitation, since the USA is a mostly bipartisan country, we cannot ignore the effect of one party in power affecting the other partisans. Since we are unaware of the exact mechanisms behind the weight calculation to measure the true feeling of the public, it is difficult to accurately capture the approval of presidents from the public.
+
+### Weight adjusted approval rating
+
+Even though we are basing our response variable `Y` from the adjusted approval ratings by different weights, we are not perfectly aware of how the weights are calculated. Since we are unaware of the exact mechanisms behind the weight calculation, we are not 100% confident that the approval rating is genuinely the representation of how the public feels about its contemporary presidents. This issue leads to another potential limitations to our research.
+
+### Bipartisan nature of the USA
+
+Connecting from the previous potential limitation, since the USA is a mostly bipartisan country, we cannot ignore the effect of one party in power affecting the other partisans. Since we are unaware of the exact mechanisms behind the weight calculation to measure the true feeling of the public, it is difficult to accurately capture the approval of presidents from the public.
 
 ### Impact of temporary events
 
