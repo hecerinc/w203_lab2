@@ -321,7 +321,7 @@ where $event_i$ is an indicator variable for the $i^{th}$ event with an associat
 
 ## Results
 
-```{r Model results, results='asis'}
+```{r Model results, results='asis', warning=FALSE, echo=FALSE}
 stargazer(m1, m2, header=F, title="Results", align=TRUE)
 ```
 
