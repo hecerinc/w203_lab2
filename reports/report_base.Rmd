@@ -103,13 +103,13 @@ We note the dip under $0 USD in April 20, 2020 shown in the graph. This data poi
 ## Approval rating vs gas
 arg.coef <- mean(df$gas, na.rm = TRUE) / mean(df$approval, na.rm = TRUE)
 ar.g <-  ggplot(df, aes(x = date)) +
-  geom_line(aes(y = approval, color = 'approval')) +
-  geom_line(aes(y = gas/arg.coef, color = 'gas')) +
+  geom_line(aes(y = approval, color = 'approval rating')) +
+  geom_line(aes(y = gas/arg.coef, color = 'gas price')) +
   scale_y_continuous(
-    name = "approval",
+    name = "approval rating",
     sec.axis = sec_axis(~.*arg.coef, name="gas price")
   ) +
-  scale_color_manual(name = "variables", values = c("approval" = "darkblue", "gas" = "darkred")) +
+  scale_color_manual(name = "variables", values = c("approval rating" = "darkblue", "gas price" = "darkred")) +
   labs(
     title = 'Approval rating vs gas price trend comparison'
   )
@@ -138,25 +138,25 @@ We note that the CPI &mdash; specifically the Food and Beverage component &mdash
 ## Unemployment + CPI
 uc_coef <- mean(df$cpi, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.cpi <- ggplot(df, aes(date)) +
-  geom_line(aes(y = unrate, color = 'unrate')) +
-  geom_line(aes(y = cpi/uc_coef, color = 'cpi')) +
+  geom_line(aes(y = unrate, color = 'Unemployment Rate')) +
+  geom_line(aes(y = cpi/uc_coef, color = 'CPI')) +
   scale_y_continuous(
     name = "Unemployment Rate",
     sec.axis = sec_axis(~.*uc_coef, name="CPI")
   ) +
-  scale_color_manual(name = "variables", values = c("unrate" = "red", "cpi" = "darkorange")) +
+  scale_color_manual(name = "variables", values = c("Unemployment Rate" = "red", "CPI" = "darkorange")) +
   labs( title = 'Unemployment rate & CPI trends' )
 
 ## CPI + approval rating
 ca_coef <- mean(df$approval, na.rm = TRUE) / mean(df$cpi, na.rm = TRUE)
 cpi.ap <-  ggplot(df, aes(x = date)) +
-  geom_line(aes(y = cpi, color = 'cpi')) +
-  geom_line(aes(y = approval/ca_coef, color = 'approval')) +
+  geom_line(aes(y = cpi, color = 'CPI')) +
+  geom_line(aes(y = approval/ca_coef, color = 'approval rating')) +
   scale_y_continuous(
     name = "CPI",
-    sec.axis = sec_axis(~.*ca_coef, name="approval")
+    sec.axis = sec_axis(~.*ca_coef, name="approval rating")
   ) +
-  scale_color_manual(name = "variables", values = c("cpi" = "darkorange", "approval" = "darkblue")) +
+  scale_color_manual(name = "variables", values = c("CPI" = "darkorange", "approval rating" = "darkblue")) +
   labs( title = 'CPI & approval rating trends' )
 
 unr.cpi / cpi.ap
@@ -190,13 +190,13 @@ In general, the unemployment rate has been decreasing in the past decade. Over t
 ## Unemployment + approval rating
 uc_coef <- mean(df$approval, na.rm = TRUE) / mean(df$unrate, na.rm = TRUE)
 unr.ap <- ggplot(df, aes(date)) +
-  geom_line(aes(y = unrate, color = 'unrate')) +
-  geom_line(aes(y = approval/uc_coef, color = 'approval')) +
+  geom_line(aes(y = unrate, color = 'Unemployment Rate')) +
+  geom_line(aes(y = approval/uc_coef, color = 'approval rating')) +
   scale_y_continuous(
     name = "Unemployment Rate",
-    sec.axis = sec_axis(~.*uc_coef, name="approval")
+    sec.axis = sec_axis(~.*uc_coef, name="approval rating")
   ) +
-  scale_color_manual(name = "variables", values = c("unrate" = "red", "approval" = "darkblue")) +
+  scale_color_manual(name = "variables", values = c("Unemployment Rate" = "red", "approval rating" = "darkblue")) +
   labs( title = 'Unemployment rate & approval rating trends' )
 
 unr.ap
