@@ -31,7 +31,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 
 ```{r Load data, include=FALSE}
-load('../data/interim/df_with_events.RData') # TODO: change this to /processed
+load('../data/interim/df_with_events.RData')
 ```
 
 ## Introduction
@@ -131,7 +131,7 @@ df <- filter(df, date != '2020-04-20')
 
 #### Food and beverage prices (CPI)
 
-Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. (TODO: maybe cite a study here). We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion.
+Our other main variable representing the lived economy of consumers is the price of food and beverages. We contend that the other place where average consumers across all income levels most immediately feel the effects of the economy is at the supermarket. We have operationalized this concept using the Food & Beverage component of the Consumer Price Index (CPI), reported monthly by the U.S. Bureau of Labor Statistics in a seasonally adjusted fashion.
 
 Similar to the unemployment rate, since this value is published at a month-only resolution, we have decided to utilize the monthly value (published at the beginning of the following month) replicated across all days of that month to match the daily resolution of approval poll data.
 
