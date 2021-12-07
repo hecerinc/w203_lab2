@@ -125,12 +125,6 @@ Similar to unemployment rate, since this value is published at a month-only reso
 We expect again a negative effect on presidential approval as food and beverage prices increase. This is because people are increasingly dissatisfied with federal administration when they cannot purchase the same goods or are having trouble feeding their families or themselves.
 
 
-```{r Exploratory charts for CPI, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
-ggplot(df, aes(date, cpi)) +
-	geom_line() +
-	labs(title='Consumer Price Index for All Urban Consumers:\nFood and Beverages in U.S. City Average (2001-2021)', x='Date', y='CPI') +
-	theme_classic()
-```
 We note that the CPI &mdash; specifically the Food and Beverage component &mdash; shows an increasing trend for the last 21 years (the notable exception is around the Great Recession of 2008/2009).
 
 
@@ -178,13 +172,6 @@ We will note the low resolution of this data. Since this is only published month
 The U.S. BLS has data going back to 1948, and we have restricted ourselves to the monthly percentage reported for the period of interest.
 
 
-```{r Exploring unemployment rate data, warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide', warning=F}
-ggplot(df, aes(date, unrate)) +
-	geom_line() +
-	scale_y_continuous(labels = function(x) paste0(x, '%')) +
-	theme_classic() + 
-	labs(title='Unemployment rate 2001-2021', x='Date', y='Unemployment rate (%)')
-```
 
 ```{r warning=FALSE, error=FALSE, echo=FALSE, message=FALSE, results='hide'}
 summary(df$unrate)
