@@ -1,5 +1,5 @@
 ---
-title: "Effects of gas prices and other economic indicators on presidential approval"
+title: "Effects of gas prices and other economic indicators on presidential approval^[Code and data for this project is available at https://github.com/hecerinc/w203_lab2]"
 author: "Malay Patel, Young Hoon Kim, Hector Rincon"
 date: "12/7/2021"
 output:
@@ -415,7 +415,10 @@ We also observed that the unemployment rate has the largest impact on the presid
 ## References
 
 
+
 - FiveThirtyEight Approval Rate Data Collection FAQ; https://fivethirtyeight.com/features/polls-policy-and-faqs/
+- Gallup. Gallup Daily: Obama job approval. Gallup.com. Retrieved December 8, 2021, from https://news.gallup.com/poll/113980/Gallup-Daily-Obama-Job-Approval.aspx. 
+- Gallup. Presidential approval ratings -- George W. Bush. Gallup.com. Retrieved December 8, 2021, from https://news.gallup.com/poll/116500/Presidential-Approval-Ratings-George-Bush.aspx. 
 - Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
 - Rakich, N. (2021, January 28). How we're tracking Joe Biden's approval rating. FiveThirtyEight. Retrieved December 8, 2021, from https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-rating/. 
 - Silver, N. (2017, March 2). How we're tracking Donald Trump's approval ratings. FiveThirtyEight. Retrieved December 8, 2021, from https://fivethirtyeight.com/features/how-were-tracking-donald-trumps-approval-ratings/. 
