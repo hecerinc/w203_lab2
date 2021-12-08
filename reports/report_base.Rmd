@@ -284,7 +284,6 @@ summary(m3)
 
 where $event_i$ is an indicator variable for the $i^{th}$ event with an associated regression coefficient $\beta_i$ for all events described previously.
 
-## Results
 
 ```{r, include=F}
 clabels <- c('WTI closing price', 'CPI - Food and Beverages', 'Unemployment rate', 'Donald Trump presidency', 'George W. Bush presidency', 'Joe Biden presidency', 'COVID-19 pandemic', 'Iraq war', '9/11', 'Katrina hurricane', 'Great recession 2008', 'Killing of Osama bin Laden', 'Trump Ukraine scandal', 'January 6, 2021 Capitol riot')
@@ -297,11 +296,13 @@ stargazer(m1, m2, m3, header=F, title="Results", align=TRUE, dep.var.labels=c('P
 
 ## Discussion
 
-The previous analysis suggests that the gas prices in the period we have identified for this study did, in fact, exert an effect on presidential approval. As expected, rising gas prices result in decreased presidential approval across all four presidencies evaluated. This is in line with our expectation that the public is sensitive to the changes in their perceived state of the economy, as represented by the gas prices.
+Results from fitting the models are shown in Table 1. The analysis suggests that the gas prices in the period we have identified for this study did, in fact, exert an effect on presidential approval. As expected, rising gas prices result in decreased presidential approval across all four presidencies evaluated. This is in line with our expectation that the public is sensitive to the changes in their perceived state of the economy, as represented by the gas prices.
 
 Additionally, we see significant effect of both CPI and unemployment rate on presidential approval. This is aligned with our theoretical model, which again suggests that the lived experience of the economy exerts an important effect on presidential approval.
 
 An important and unexpected effect that results from the analysis is that, while the actual coefficients for each presidency do not have a direct interpretation, we can clearly see a trend for marked increase in approval for Democratic presidents, as opposed to their Republican counterparts, as reflected by the negative regression coefficients for George W. Bush and Donald Trump and the analogous *positive* coefficients for Joe Biden and Barack Obama (baseline).
+
+A surprising result from the table is found in our $R^2$ values. These consistently improved across all three models, but given the nature of the response variable, we did not expect to have such high levels of explainability of the inherent variance in the variable by the relatively small amount of covariates we have used. The results suggest that 58% percent of the variation inherent to presidential approval can be explained by the model. This is surprising insofar as presidential approval is subject to many different phenomena that is difficult to quantify. It is a subjective evaluation of the way people feel about the job their president is doing. Our theoretical model logically suggests that people are sensitive to variables that impact their bottom line &mdash; the price for gas, their supermarket bill, and whether they have a job or not &mdash; but it's suggestive that these few variables already explain a significant portion of people's feelings towards the current president in office.
 
 It's important to note that the model results are limited in their generalizability. We can confidently assert that the economic indicators we have studied have an important effect on presidential approval, which, according to the literature, in turn has significant predictive power towards election results that is relevant for political actors. These results imply that there are, in fact, avenues of action that presidents and their administrations can consider and implement to affect these factors and that these would then have some influence on their results for subsequent elections.
 
@@ -313,7 +314,7 @@ We have fairly large sample size (> 100 rows) of data in our collected sample, h
 
 #### IID
 
-We have taken the data from FiveThirtyEight who moderates and collects data from various pollsters who inherently run these surveys with American to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any `house` effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.
+We have taken the data from FiveThirtyEight which collects and aggregates data from various pollsters who run these surveys on a representative sample of the American voter population to record their responses for presidential approval ratings. Additionally, FiveThirtyEight ensures to negate any party affiliation effect to eliminate biases. The randomness of the survey participant selection indicates that the collected data would meet IID requirements.(Silver, 2017) (Rakich, 2021)
 
 #### Unique BLP exists
 
@@ -393,8 +394,10 @@ We also observed that the unemployment rate has the largest impact on the presid
 ## References
 
 
-- U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/dcoilwtico, December 1, 2021.
-- U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
-- U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/cpifabsl, December 5, 2021.
-- Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
 - FiveThirtyEight Approval Rate Data Collection FAQ; https://fivethirtyeight.com/features/polls-policy-and-faqs/
+- Hlavac, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer
+- Rakich, N. (2021, January 28). How we're tracking Joe Biden's approval rating. FiveThirtyEight. Retrieved December 8, 2021, from https://fivethirtyeight.com/features/how-were-tracking-joe-bidens-approval-rating/. 
+- Silver, N. (2017, March 2). How we're tracking Donald Trump's approval ratings. FiveThirtyEight. Retrieved December 8, 2021, from https://fivethirtyeight.com/features/how-were-tracking-donald-trumps-approval-ratings/. 
+- U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers: Food and Beverages in U.S. City Average [CPIFABSL], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/cpifabsl, December 5, 2021.
+- U.S. Bureau of Labor Statistics, Unemployment Rate [UNRATE], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 4, 2021.
+- U.S. Energy Information Administration, Crude Oil Prices: West Texas Intermediate (WTI) - Cushing, Oklahoma [DCOILWTICO], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/dcoilwtico, December 1, 2021.
